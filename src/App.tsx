@@ -3,7 +3,7 @@ import { coreContext } from './contexts/core.context';
 import { useCallisto } from './hooks/use-callisto.hook';
 import { CallistoService } from './services/callisto.service';
 
-const callisto: CallistoService = new CallistoService(coreContext);
+const callisto = new CallistoService(coreContext);
 
 callisto.addResponseListener(async (response) => window.speechSynthesis.speak(new SpeechSynthesisUtterance(response.responseText)))
 callisto.addNoMatchListener(() => window.speechSynthesis.speak(new SpeechSynthesisUtterance("I don't understand")));

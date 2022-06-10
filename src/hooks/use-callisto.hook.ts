@@ -28,11 +28,11 @@ export const useCallisto = (callisto: CallistoService) => {
   }
 
   useEffect(() => {
-    callisto.onInterim(handleSetInterim);
-    callisto.onResult(setResult);
-    callisto.onWaiting(() => setLoading(true));
-    callisto.onNoMatch(handleSetNoMatch);
-    callisto.onResponse(handleSetResponse);
+    callisto.addInterimListener(handleSetInterim);
+    callisto.addFinalResultListener(setResult);
+    callisto.addWaitingListener(() => setLoading(true));
+    callisto.addNoMatchListener(handleSetNoMatch);
+    callisto.addResponseListener(handleSetResponse);
   }, []);
 
   return { interim, result, loading, noMatch, response };

@@ -42,23 +42,23 @@ export class CallistoService {
     }
   }
 
-  onInterim(listener: TranscriptListener) {
+  addInterimListener(listener: TranscriptListener) {
     this.interimListeners.push(listener);
   }
 
-  onResult(listener: TranscriptListener) {
+  addFinalResultListener(listener: TranscriptListener) {
     this.resultListeners.push(listener);
   }
 
-  onWaiting(listener: GenericListener) {
+  addWaitingListener(listener: GenericListener) {
     this.waitingListeners.push(listener);
   }
 
-  onNoMatch(listener: GenericListener) {
+  addNoMatchListener(listener: GenericListener) {
     this.noMatchListeners.push(listener);
   }
 
-  onResponse(listener: ResponseListener) {
+  addResponseListener(listener: ResponseListener) {
     this.responseListeners.push(listener);
   }
 

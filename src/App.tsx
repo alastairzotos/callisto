@@ -5,11 +5,8 @@ import { CallistoService } from './services/callisto.service';
 
 const callisto: CallistoService = new CallistoService(coreContext);
 
-callisto.onResponse(async (response) => {
-  window.speechSynthesis.speak(new SpeechSynthesisUtterance(response.responseText));
-})
-
-callisto.onNoMatch(() => window.speechSynthesis.speak(new SpeechSynthesisUtterance("I don't understand")));
+callisto.addResponseListener(async (response) => window.speechSynthesis.speak(new SpeechSynthesisUtterance(response.responseText)))
+callisto.addNoMatchListener(() => window.speechSynthesis.speak(new SpeechSynthesisUtterance("I don't understand")));
 
 const App: React.FC = () => {
   const { interim, result, loading, noMatch, response } = useCallisto(callisto);

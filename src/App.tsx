@@ -1,18 +1,32 @@
 import React from 'react';
-import { Manager } from './components/manager.component';
 import { coreContext } from './contexts/core.context';
+import { useCallisto } from './hooks/use-callisto.hook';
 import { CallistoService } from './services/callisto.service';
 
+const callisto: CallistoService = new CallistoService(coreContext);
+
+callisto.onResponse(async (response) => {
+  window.speechSynthesis.speak(new SpeechSynthesisUtterance(response.responseText));
+})
+
+callisto.onNoMatch(() => window.speechSynthesis.speak(new SpeechSynthesisUtterance("I don't understand")));
+
 const App: React.FC = () => {
-  const callisto: CallistoService = new CallistoService(coreContext);
+  const { interim, result, loading, noMatch, response } = useCallisto(callisto);
 
-  callisto.onResponse(async (response) => {
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance(response.responseText));
-  })
+  return (
+    <>
+      {
+        result
+          ? <samp>{'>'} {result}</samp>
+          : <samp>{interim}</samp>
+      }
 
-  callisto.onNoMatch(() => window.speechSynthesis.speak(new SpeechSynthesisUtterance("I don't understand")));
-
-  return <Manager callisto={callisto} />;
+      {loading && <samp>...</samp>}
+      {noMatch && <p>No match</p>}
+      {response && <p>{response}</p>}
+    </>
+  );
 }
 
 export default App;

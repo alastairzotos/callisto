@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { InteractionResponse } from '../models/context.models';
+import React from 'react';
+import { useCallisto } from '../hooks/use-callisto.hook';
 import { CallistoService } from '../services/callisto.service';
 
 interface Props {
@@ -19,37 +19,7 @@ export const Manager: React.FC<Props> = ({
   noMatchComponent = () => <p>No match</p>,
   responseComponent = ({ response }) => <p>{response}</p>,
 }) => {
-  const [interim, setInterim] = useState('');
-  const [result, setResult] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [noMatch, setNoMatch] = useState(false);
-  const [response, setResponse] = useState('');
-
-  const handleSetInterim = (transcript: string) => {
-    setNoMatch(false);
-    setResult('');
-    setResponse('');
-    setInterim(transcript);
-  }
-
-  const handleSetResponse = async (response: InteractionResponse) => {
-    setLoading(false);
-    setNoMatch(false);
-    setResponse(response.responseText);
-  }
-
-  const handleSetNoMatch = () => {
-    setLoading(false);
-    setNoMatch(true);
-  }
-
-  useEffect(() => {
-    callisto.onInterim(handleSetInterim);
-    callisto.onResult(setResult);
-    callisto.onWaiting(() => setLoading(true));
-    callisto.onNoMatch(handleSetNoMatch);
-    callisto.onResponse(handleSetResponse);
-  }, []);
+  const { interim, result, loading, noMatch, response } = useCallisto(callisto);
 
   return (
     <>

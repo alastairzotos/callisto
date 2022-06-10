@@ -81,7 +81,6 @@ export class CallistoService {
     if (response.error) {
       await Promise.all(this.noMatchListeners.map(listener => listener()));
     } else if (response.interactionResponse) {
-
       await Promise.all(
         this.responseListeners.map(listener => listener(response.interactionResponse!))
       )

@@ -1,26 +1,18 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Manager } from './components/manager.component';
+import { coreContext } from './contexts/core.context';
+import { CallistoService } from './services/callisto.service';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const App: React.FC = () => {
+  const callisto: CallistoService = new CallistoService(coreContext);
+
+  callisto.onResponse(async (response) => {
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(response.responseText));
+  })
+
+  callisto.onNoMatch(() => window.speechSynthesis.speak(new SpeechSynthesisUtterance("I don't understand")));
+
+  return <Manager callisto={callisto} />;
 }
 
 export default App;

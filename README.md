@@ -1,3 +1,5 @@
 # Callisto Virtual Assistant
 
-// Todo 🤙
+Todo: Update this README 🤙
+
+See `/src/contexts/core.context.ts` to see how interactions are handled.

@@ -43,4 +43,10 @@ export class CallistoContext {
 
     return this;
   }
+
+  addInteractions(interactions: { [regex: string]: InteractionHandler }) {
+    Object.keys(interactions).forEach(regex => this.addInteraction(regex, interactions[regex]));
+
+    return this;
+  }
 }

@@ -18,7 +18,7 @@ export class CallistoContext {
       const match = interaction.regex.exec(transcript);
       
       if (match) {
-        const interactionResponse = await interaction.handler([...match?.slice(1).map(i => i ? i.trim() : i)]);
+        const interactionResponse = await interaction.handler([...match?.slice(1).map(i => i ? i.trim().toLocaleLowerCase() : i)]);
 
         return {
           error: false,

@@ -1,5 +1,5 @@
 import { CallistoContext } from "../contexts/context";
-import { ResponseListener, TranscriptListener, GenericListener } from "../models/context.models";
+import { ResponseListener, TranscriptListener, GenericListener, GenericPromiseListener } from "../models/context.models";
 import { WebkitSpeechRecognition } from "../models/speech.models";
 import { IWindow } from "../models/window.model";
 
@@ -8,7 +8,7 @@ export class CallistoService {
   private interimListeners: TranscriptListener[] = [];
   private resultListeners: TranscriptListener[] = [];
   private waitingListeners: GenericListener[] = [];
-  private noMatchListeners: GenericListener[] = [];
+  private noMatchListeners: GenericPromiseListener[] = [];
   private responseListeners: ResponseListener[] = [];
   private currentContext?: CallistoContext;
 
@@ -54,7 +54,7 @@ export class CallistoService {
     this.waitingListeners.push(listener);
   }
 
-  addNoMatchListener(listener: GenericListener) {
+  addNoMatchListener(listener: GenericPromiseListener) {
     this.noMatchListeners.push(listener);
   }
 
@@ -74,11 +74,14 @@ export class CallistoService {
     this.resultListeners.forEach(listener => listener(transcript));
     this.waitingListeners.forEach(listener => listener());
 
+    this.recognition?.abort();
+
     const response = await this.currentContext.handleTranscript(transcript);
 
     if (response.error) {
-      this.noMatchListeners.forEach(listener => listener());
+      await Promise.all(this.noMatchListeners.map(listener => listener()));
     } else if (response.interactionResponse) {
+
       await Promise.all(
         this.responseListeners.map(listener => listener(response.interactionResponse!))
       )
@@ -89,5 +92,7 @@ export class CallistoService {
         this.currentContext = this.currentContext?.parent;
       }
     }
+
+    this.recognition?.start();
   }
 }

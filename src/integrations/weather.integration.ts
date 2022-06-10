@@ -9,6 +9,10 @@ export class WeatherIntegration {
     localStorage.setItem('location', location);
   }
 
+  forgetLocation() {
+    localStorage.removeItem('location');
+  }
+
   async getWeather(time: string, location?: string): Promise<string> {
     if (!location) {
       location = this.savedLocation()!;

@@ -5,8 +5,17 @@ import { CallistoService } from './services/callisto.service';
 
 const callisto = new CallistoService(coreContext);
 
-callisto.addResponseListener(async (response) => window.speechSynthesis.speak(new SpeechSynthesisUtterance(response.responseText)))
-callisto.addNoMatchListener(() => window.speechSynthesis.speak(new SpeechSynthesisUtterance("I don't understand")));
+callisto.addResponseListener((response) => new Promise((resolve) => {
+  const utterance = new SpeechSynthesisUtterance(response.responseText);
+  utterance.onend = () => resolve();
+  window.speechSynthesis.speak(utterance)
+}))
+
+callisto.addNoMatchListener(() => new Promise((resolve) => {
+  const utterance = new SpeechSynthesisUtterance("I don't understand");
+  utterance.onend = () => resolve();
+  window.speechSynthesis.speak(utterance)
+}))
 
 const App: React.FC = () => {
   const { interim, result, loading, noMatch, response } = useCallisto(callisto);

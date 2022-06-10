@@ -6,7 +6,13 @@ import { getWeatherLocationContext } from "./weather-location.context"
 export const coreContext = new CallistoContext()
 
 coreContext
-  .addInteraction(/^what's the weather like( today| tomorrow)?$/i, async ([time = 'today']) => {
+  .addInteraction("forget me", async () => {
+    weatherIntegration.forgetLocation();
+
+    return { responseText: 'Forgot location' };
+  })
+
+  .addInteraction("what's the weather like( today| tomorrow)?", async ([time = 'today']) => {
     if (!!weatherIntegration.savedLocation()) {
       return {
         responseText: await weatherIntegration.getWeather(time)
@@ -18,13 +24,14 @@ coreContext
       }
     }
   })
-  .addInteraction(/^tell me about (.*)$/i, async ([topic]) => {
+
+  .addInteraction("tell me about (.*)", async ([topic]) => {
     return {
       responseText: await wikipediaIntegration.getSummary(topic)
     }
   })
 
-  .addInteraction(/^tell (.*) to go f\*\*\* himself$/, async ([name]) => {
+  .addInteraction("tell (.*) to go f\\*\\*\\* himself", async ([name]) => {
     return {
       responseText: `Go fuck yourself ${name}`
     }

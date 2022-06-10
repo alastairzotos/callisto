@@ -35,8 +35,11 @@ export class CallistoContext {
     return { error: true }
   }
 
-  addInteraction(regex: RegExp, handler: InteractionHandler) {
-    this.interactions.push({ regex, handler });
+  addInteraction(regex: string, handler: InteractionHandler) {
+    this.interactions.push({
+      regex: new RegExp(`^${regex}$`, 'i'),
+      handler
+    });
 
     return this;
   }

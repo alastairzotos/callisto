@@ -22,7 +22,7 @@ export const useCallisto = (callisto: CallistoService) => {
     setResponse(response.responseText);
   }
 
-  const handleSetNoMatch = () => {
+  const handleSetNoMatch = async () => {
     setLoading(false);
     setNoMatch(true);
   }

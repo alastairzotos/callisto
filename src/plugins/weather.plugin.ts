@@ -12,7 +12,6 @@ const getWeatherLocationContext = (coreContext: CallistoContext, time: string) =
       }
     });
 
-
 export const weatherPlugin: CallistoPlugin = rootContext => {
   rootContext
     .addInteraction("forget my location", async () => {
@@ -34,4 +33,3 @@ export const weatherPlugin: CallistoPlugin = rootContext => {
       }
     })
 }
-

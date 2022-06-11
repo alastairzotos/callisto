@@ -7,7 +7,7 @@ const getWeatherLocationContext = (coreContext: CallistoContext, time: string) =
     .addInteraction("(.*)", async ([location]) => {
       return {
         responseText: await weatherIntegration.getWeather(time, location),
-        break: true,
+        goToParentContextOnceFinished: true,
       }
     });
 

@@ -96,7 +96,7 @@ export class CallistoService {
 
       this.currentContext = response.matchingContext;
 
-      if (response.interactionResponse.break) {
+      if (response.interactionResponse.goToParentContextOnceFinished) {
         this.currentContext = this.currentContext?.parent;
       }
     }

@@ -2,8 +2,7 @@ import { CallistoContext } from "../contexts/context";
 
 export interface InteractionResponse {
   responseText: string;
-  /** Will send us back to the parent context once the interaction is handled. If false, stay in the current context */
-  break?: boolean;
+  goToParentContextOnceFinished?: boolean;
   context?: CallistoContext;
 }
 

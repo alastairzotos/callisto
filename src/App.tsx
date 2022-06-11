@@ -14,7 +14,6 @@ callisto.applyPlugins([weatherPlugin, wikipediaPlugin, funnyPlugin])
 callisto.addResponseListener(async response => await speak(response.responseText))
 callisto.addNoMatchListener(async () => await speak('Sorry, I don\'t understand.'))
 
-
 const App: React.FC = () => {
   const { interim, result, loading, noMatch, response } = useCallisto(callisto);
 

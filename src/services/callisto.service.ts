@@ -1,5 +1,6 @@
 import { CallistoContext } from "../contexts/context";
 import { ResponseListener, TranscriptListener, GenericListener, GenericPromiseListener } from "../models/context.models";
+import { CallistoPlugin } from "../models/service.models";
 import { WebkitSpeechRecognition } from "../models/speech.models";
 import { IWindow } from "../models/window.model";
 
@@ -12,8 +13,8 @@ export class CallistoService {
   private responseListeners: ResponseListener[] = [];
   private currentContext?: CallistoContext;
 
-  constructor(private coreContext: CallistoContext) {
-    this.currentContext = coreContext;
+  constructor(private rootContext: CallistoContext) {
+    this.currentContext = rootContext;
 
     if ('webkitSpeechRecognition' in window) {
       const { webkitSpeechRecognition } = window as unknown as IWindow;
@@ -42,6 +43,14 @@ export class CallistoService {
     }
   }
 
+  applyPlugin(plugin: CallistoPlugin) {
+    plugin(this.rootContext)
+  }
+
+  applyPlugins(plugins: CallistoPlugin[]) {
+    plugins.forEach(plugin => this.applyPlugin(plugin));
+  }
+
   addInterimListener(listener: TranscriptListener) {
     this.interimListeners.push(listener);
   }
@@ -68,7 +77,7 @@ export class CallistoService {
 
   private async onResulTranscript(transcript: string) {
     if (!this.currentContext) {
-      this.currentContext = this.coreContext;
+      this.currentContext = this.rootContext;
     }
 
     this.resultListeners.forEach(listener => listener(transcript));

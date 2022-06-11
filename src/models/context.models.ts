@@ -15,6 +15,6 @@ export interface Interaction {
 }
 
 export type GenericListener = () => void;
-export type GenericPromiseListener = () => Promise<void>;
+export type GenericPromiseListener = () => Promise<void | unknown>;
 export type TranscriptListener = (transcript: string) => void;
-export type ResponseListener = (response: InteractionResponse) => Promise<void>;
+export type ResponseListener = (response: InteractionResponse) => Promise<void | unknown>;

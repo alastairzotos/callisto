@@ -1,21 +1,19 @@
 import React from 'react';
-import { coreContext } from './contexts/core.context';
+import { rootContext } from './contexts/context';
 import { useCallisto } from './hooks/use-callisto.hook';
+import { funnyPlugin } from './plugins/funny.plugin';
+import { weatherPlugin } from './plugins/weather.plugin';
+import { wikipediaPlugin } from './plugins/wikipedia.plugin';
 import { CallistoService } from './services/callisto.service';
+import { speak } from './utils/speech';
 
-const callisto = new CallistoService(coreContext);
+const callisto = new CallistoService(rootContext);
 
-callisto.addResponseListener((response) => new Promise((resolve) => {
-  const utterance = new SpeechSynthesisUtterance(response.responseText);
-  utterance.onend = () => resolve();
-  window.speechSynthesis.speak(utterance)
-}))
+callisto.applyPlugins([weatherPlugin, wikipediaPlugin, funnyPlugin])
 
-callisto.addNoMatchListener(() => new Promise((resolve) => {
-  const utterance = new SpeechSynthesisUtterance("I don't understand");
-  utterance.onend = () => resolve();
-  window.speechSynthesis.speak(utterance)
-}))
+callisto.addResponseListener(async response => await speak(response.responseText))
+callisto.addNoMatchListener(async () => await speak('Sorry, I don\'t understand.'))
+
 
 const App: React.FC = () => {
   const { interim, result, loading, noMatch, response } = useCallisto(callisto);

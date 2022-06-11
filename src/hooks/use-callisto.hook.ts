@@ -3,6 +3,7 @@ import { InteractionResponse } from "../models/context.models";
 import { CallistoService } from "../callisto/callisto";
 
 export const useCallisto = (callisto: CallistoService) => {
+  const [listening, setListening] = useState(false);
   const [interim, setInterim] = useState('');
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,6 +29,7 @@ export const useCallisto = (callisto: CallistoService) => {
   }
 
   useEffect(() => {
+    callisto.addListeningListener(setListening);
     callisto.addInterimListener(handleSetInterim);
     callisto.addFinalResultListener(setResult);
     callisto.addWaitingListener(() => setLoading(true));
@@ -35,5 +37,5 @@ export const useCallisto = (callisto: CallistoService) => {
     callisto.addResponseListener(handleSetResponse);
   }, []);
 
-  return { interim, result, loading, noMatch, response };
+  return { listening, interim, result, loading, noMatch, response };
 }

@@ -14,10 +14,20 @@ callisto.addResponseListener(async response => await speak(response.responseText
 callisto.addNoMatchListener(async () => await speak("Sorry, I don't understand."))
 
 const App: React.FC = () => {
-  const { interim, result, loading, noMatch, response } = useCallisto(callisto);
+  const { listening, interim, result, loading, noMatch, response } = useCallisto(callisto);
 
   return (
     <>
+      <button
+        onMouseDown={() => callisto.startRecognition()}
+        onMouseUp={() => callisto.stopRecognition()}
+        onTouchStart={() => callisto.startRecognition()}
+        onTouchEnd={() => callisto.stopRecognition()}
+      >
+        { listening ? 'Listening' : 'Listen' }
+      </button>
+      <br />
+
       {
         result
           ? <samp>{'>'} {result}</samp>

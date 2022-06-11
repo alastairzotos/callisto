@@ -1,5 +1,5 @@
 import { CallistoContext } from "./context";
-import { ResponseListener, TranscriptListener, GenericListener, GenericPromiseListener } from "../models/context.models";
+import { ResponseListener, TranscriptListener, GenericListener, GenericPromiseListener, ListeningListener } from "../models/context.models";
 import { CallistoPlugin } from "../models/service.models";
 import { WebkitSpeechRecognition } from "../models/speech.models";
 import { IWindow } from "../models/window.model";
@@ -11,9 +11,12 @@ export class CallistoService {
   private waitingListeners: GenericListener[] = [];
   private noMatchListeners: GenericPromiseListener[] = [];
   private responseListeners: ResponseListener[] = [];
+  private listeningListeners: ListeningListener[] = [];
 
   private rootContext = new CallistoContext();
   private currentContext?: CallistoContext = this.rootContext;
+
+  private recognitionEnabled: boolean = true;
 
   constructor() {
     if ('webkitSpeechRecognition' in window) {
@@ -37,11 +40,28 @@ export class CallistoService {
             this.onInterimTranscript(transcript);
           }
         };
-
-        this.recognition.start();
       }
     }
   }
+
+  startRecognition() {
+    if (this.recognitionEnabled) {
+      this.recognition?.start();
+      this.broadcastListeningStatus(true);
+    }
+  }
+
+  stopRecognition() {
+    if (this.recognitionEnabled) {
+
+      // User will often unclick the button before the speech recognition is finished.
+      setTimeout(() => {
+        this.recognition?.abort();
+        this.broadcastListeningStatus(false);
+      }, 2000);
+    }
+  }
+
 
   applyPlugin(plugin: CallistoPlugin) {
     plugin(this.rootContext)
@@ -71,6 +91,14 @@ export class CallistoService {
     this.responseListeners.push(listener);
   }
 
+  addListeningListener(listener: ListeningListener) {
+    this.listeningListeners.push(listener);
+  }
+
+  private broadcastListeningStatus(listening: boolean) {
+    this.listeningListeners.forEach(listener => listener(listening));
+  }
+
   private onInterimTranscript(transcript: string) {
     this.interimListeners.forEach(listener => listener(transcript));
   }
@@ -80,10 +108,12 @@ export class CallistoService {
       this.currentContext = this.rootContext;
     }
 
+    this.recognition?.abort();
+    this.recognitionEnabled = false;
+    this.broadcastListeningStatus(false);
+
     this.resultListeners.forEach(listener => listener(transcript));
     this.waitingListeners.forEach(listener => listener());
-
-    this.recognition?.abort();
 
     const response = await this.currentContext.handleTranscript(transcript);
 
@@ -101,6 +131,6 @@ export class CallistoService {
       }
     }
 
-    this.recognition?.start();
+    this.recognitionEnabled = true;
   }
 }

@@ -47,7 +47,7 @@ export class CallistoService {
     plugin(this.rootContext)
   }
 
-  applyPlugins(plugins: CallistoPlugin[]) {
+  applyPlugins(...plugins: CallistoPlugin[]) {
     plugins.forEach(plugin => this.applyPlugin(plugin));
   }
 

@@ -9,7 +9,7 @@ import { speak } from './utils/speech';
 
 const callisto = new CallistoService(rootContext);
 
-callisto.applyPlugins([weatherPlugin, wikipediaPlugin, funnyPlugin])
+callisto.applyPlugins(weatherPlugin, wikipediaPlugin, funnyPlugin)
 
 callisto.addResponseListener(async response => await speak(response.responseText))
 callisto.addNoMatchListener(async () => await speak('Sorry, I don\'t understand.'))

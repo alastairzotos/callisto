@@ -131,6 +131,7 @@ export class CallistoService {
       }
     }
 
+    this.recognition?.start();
     this.recognitionEnabled = true;
   }
 }

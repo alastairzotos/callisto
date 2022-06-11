@@ -14,6 +14,7 @@ export interface WebkitSpeechRecognition {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
+  onend: () => void;
   onresult: (event: WebkitSpeechRecognitionResultEvent) => void;
   start: () => void;
   abort: () => void;

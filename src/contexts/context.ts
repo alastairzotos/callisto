@@ -1,10 +1,5 @@
-import { Interaction, InteractionHandler, InteractionResponse } from "../models/context.models";
-
-interface InteractionHandlerResponse {
-  error: boolean;
-  interactionResponse?: InteractionResponse;
-  matchingContext?: CallistoContext;
-}
+import { Interaction, InteractionHandler, InteractionHandlerResponse } from "../models/context.models";
+import { fleshOutInteractionResponse } from "../utils/interaction-response";
 
 export class CallistoContext {
   private interactions: Interaction[] = [];
@@ -18,12 +13,14 @@ export class CallistoContext {
       const match = interaction.regex.exec(transcript);
       
       if (match) {
-        const interactionResponse = await interaction.handler([...match?.slice(1).map(i => i ? i.trim().toLocaleLowerCase() : i)]);
+        const interactionResponse = fleshOutInteractionResponse(
+          await interaction.handler([...match?.slice(1).map(i => i ? i.trim().toLocaleLowerCase() : i)])
+        );
 
         return {
           error: false,
-          matchingContext: typeof interactionResponse === 'string' ? this : interactionResponse.context,
-          interactionResponse: typeof interactionResponse === 'string' ? { responseText: interactionResponse } : interactionResponse,
+          matchingContext: interactionResponse.context || this,
+          interactionResponse
         }
       }
     }

@@ -1,5 +1,6 @@
 import { CallistoContext } from "../contexts/context"
 import { InteractionResponse } from "../models/context.models"
+import { fleshOutInteractionResponse } from "./interaction-response"
 
 export const ask = (
   ctx: CallistoContext,
@@ -10,10 +11,10 @@ export const ask = (
   return {
     responseText: question,
     context: ctx.addInteraction('(.*)', async ([response]) => {
-      const res = await onResponse(response);
+      const res = fleshOutInteractionResponse(await onResponse(response));
 
       return {
-        ...(typeof res === 'string' ? { responseText: res } : res),
+        ...res,
         goToParentContextOnceFinished
       }
     }),

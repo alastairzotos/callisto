@@ -13,6 +13,12 @@ export interface Interaction {
   handler: InteractionHandler;
 }
 
+export interface InteractionHandlerResponse {
+  error: boolean;
+  interactionResponse?: InteractionResponse;
+  matchingContext?: CallistoContext;
+}
+
 export type GenericListener = () => void;
 export type GenericPromiseListener = () => Promise<void | unknown>;
 export type TranscriptListener = (transcript: string) => void;

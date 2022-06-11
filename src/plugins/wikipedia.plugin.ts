@@ -1,8 +1,8 @@
 import { wikipediaIntegration } from "../integrations/wikipedia.intergration"
 import { CallistoPlugin } from "../models/service.models"
 
-export const wikipediaPlugin: CallistoPlugin = rootContext => {
-  rootContext
+export const wikipediaPlugin: CallistoPlugin = ctx => {
+  ctx
     .addInteraction("tell me about (.+)", async ([topic]) => {
       return {
         responseText: await wikipediaIntegration.getSummary(topic)

@@ -1,18 +1,9 @@
-import { CallistoContext } from "../contexts/context";
 import { weatherIntegration } from "../integrations/weather.integration"
 import { CallistoPlugin } from "../models/service.models"
+import { ask } from "../utils/ask";
 
-const getWeatherLocationContext = (coreContext: CallistoContext, time: string) =>
-  new CallistoContext(coreContext)
-    .addInteraction("(.*)", async ([location]) => {
-      return {
-        responseText: await weatherIntegration.getWeather(time, location),
-        goToParentContextOnceFinished: true,
-      }
-    });
-
-export const weatherPlugin: CallistoPlugin = rootContext => {
-  rootContext
+export const weatherPlugin: CallistoPlugin = ctx => {
+  ctx
     .addInteraction("forget my location", async () => {
       weatherIntegration.forgetLocation();
 
@@ -25,10 +16,10 @@ export const weatherPlugin: CallistoPlugin = rootContext => {
           responseText: await weatherIntegration.getWeather(time)
         }
       } else {
-        return {
-          responseText: 'Where do you live?',
-          context: getWeatherLocationContext(rootContext, time)
-        }
+        return ask(ctx, "Where do you live?", async reponse => ({
+          responseText: await weatherIntegration.getWeather(time, reponse),
+          goToParentContextOnceFinished: true,
+        }))
       }
     })
 }

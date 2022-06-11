@@ -11,11 +11,11 @@ export class CallistoService {
   private waitingListeners: GenericListener[] = [];
   private noMatchListeners: GenericPromiseListener[] = [];
   private responseListeners: ResponseListener[] = [];
-  private currentContext?: CallistoContext;
 
-  constructor(private rootContext: CallistoContext) {
-    this.currentContext = rootContext;
+  private rootContext = new CallistoContext();
+  private currentContext?: CallistoContext = this.rootContext;
 
+  constructor() {
     if ('webkitSpeechRecognition' in window) {
       const { webkitSpeechRecognition } = window as unknown as IWindow;
 

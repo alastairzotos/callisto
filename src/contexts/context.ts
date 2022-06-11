@@ -50,5 +50,3 @@ export class CallistoContext {
     return this;
   }
 }
-
-export const rootContext = new CallistoContext()

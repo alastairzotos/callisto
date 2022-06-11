@@ -10,7 +10,7 @@ export const weatherPlugin: CallistoPlugin = ctx => {
     })
 
     .addInteraction("what's the weather like( today| tomorrow)?", async ([time = 'today']) => {
-      if (!!weatherIntegration.savedLocation()) {
+      if (weatherIntegration.savedLocation()) {
         return await weatherIntegration.getWeather(time)
       } else {
         return ask(ctx, "Where do you live?", async location => await weatherIntegration.getWeather(time, location))

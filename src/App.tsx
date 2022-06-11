@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Button, Container, CssBaseline, LinearProgress, Typography } from '@mui/material';
+
 import { useCallisto } from './hooks/use-callisto.hook';
 import { funnyPlugin } from './plugins/funny.plugin';
 import { weatherPlugin } from './plugins/weather.plugin';
 import { wikipediaPlugin } from './plugins/wikipedia.plugin';
 import { CallistoService } from './callisto/callisto';
 import { speak } from './utils/speech';
+
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark'
+  }
+});
 
 const callisto = new CallistoService();
 
@@ -17,28 +27,36 @@ const App: React.FC = () => {
   const { listening, interim, result, loading, noMatch, response } = useCallisto(callisto);
 
   return (
-    <>
-      <button
-        style={{ padding: 20 }}
-        onMouseDown={() => callisto.startRecognition()}
-        onMouseUp={() => callisto.stopRecognition()}
-        onTouchStart={() => callisto.startRecognition()}
-        onTouchEnd={() => callisto.stopRecognition()}
-      >
-        { listening ? 'Listening' : 'Listen' }
-      </button>
-      <br />
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
 
-      {
-        result
-          ? <samp>{'>'} {result}</samp>
-          : <samp>{interim}</samp>
-      }
+      <Container maxWidth="sm">
+        <div style={{ height: '50vh', padding: 20 }}>
+          {
+            result
+              ? <Typography>{'>'} {result}</Typography>
+              : <Typography>{interim}</Typography>
+          }
 
-      {loading && <samp>...</samp>}
-      {noMatch && <p>No match</p>}
-      {response && <p>{response}</p>}
-    </>
+          {loading && <LinearProgress />}
+          {noMatch && <Typography>No match</Typography>}
+          {response && <Typography>{response}</Typography>}
+        </div>
+
+        <div>
+          <Button
+            style={{ padding: 20, width: '100%' }}
+            variant="contained"
+            onMouseDown={() => callisto.startRecognition()}
+            onMouseUp={() => callisto.stopRecognition()}
+            onTouchStart={() => callisto.startRecognition()}
+            onTouchEnd={() => callisto.stopRecognition()}
+          >
+            {listening ? 'Listening' : 'Listen'}
+          </Button>
+        </div>
+      </Container>
+    </ThemeProvider>
   );
 }
 

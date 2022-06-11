@@ -13,14 +13,13 @@ callisto.applyPlugins(weatherPlugin, wikipediaPlugin, funnyPlugin)
 callisto.addResponseListener(async response => await speak(response.responseText))
 callisto.addNoMatchListener(async () => await speak("Sorry, I don't understand."))
 
-callisto.startRecognition();
-
 const App: React.FC = () => {
   const { listening, interim, result, loading, noMatch, response } = useCallisto(callisto);
 
   return (
     <>
-      {/* <button
+      <button
+        style={{ padding: 20 }}
         onMouseDown={() => callisto.startRecognition()}
         onMouseUp={() => callisto.stopRecognition()}
         onTouchStart={() => callisto.startRecognition()}
@@ -28,7 +27,7 @@ const App: React.FC = () => {
       >
         { listening ? 'Listening' : 'Listen' }
       </button>
-      <br /> */}
+      <br />
 
       {
         result

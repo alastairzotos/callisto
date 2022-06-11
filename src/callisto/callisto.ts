@@ -40,8 +40,6 @@ export class CallistoService {
             this.onInterimTranscript(transcript);
           }
         };
-
-        this.recognition.onend = () => this.recognition?.start();
       }
     }
   }
@@ -133,7 +131,6 @@ export class CallistoService {
       }
     }
 
-    this.recognition?.start();
     this.recognitionEnabled = true;
   }
 }

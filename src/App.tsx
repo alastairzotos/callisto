@@ -9,6 +9,7 @@ import { CallistoService } from './callisto/callisto';
 import { speak } from './utils/speech';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { jokesPlugin } from './plugins/jokes.plugin';
 
 const darkTheme = createTheme({
   palette: {
@@ -18,7 +19,7 @@ const darkTheme = createTheme({
 
 const callisto = new CallistoService();
 
-callisto.applyPlugins(weatherPlugin, wikipediaPlugin, funnyPlugin)
+callisto.applyPlugins(weatherPlugin, wikipediaPlugin, jokesPlugin, funnyPlugin)
 
 callisto.addResponseListener(async response => await speak(response.responseText))
 callisto.addNoMatchListener(async () => await speak("Sorry, I don't understand."))

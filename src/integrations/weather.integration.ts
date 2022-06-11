@@ -33,10 +33,12 @@ export class WeatherIntegration {
   }
 
   private generateUri(time: string, location: string): string | undefined {
+    const protocol = env.production ? 'https' : 'http';
+
     if (time === 'today') {
-      return `http://api.weatherapi.com/v1/current.json?key=${env.weatherApiKey}&q=${location}&aqi=no`;
+      return `${protocol}://api.weatherapi.com/v1/current.json?key=${env.weatherApiKey}&q=${location}&aqi=no`;
     } else if (time === 'tomorrow') {
-      return `http://api.weatherapi.com/v1/forecast.json?key=${env.weatherApiKey}&q=${location}&days=2&aqi=no`;
+      return `${protocol}://api.weatherapi.com/v1/forecast.json?key=${env.weatherApiKey}&q=${location}&days=2&aqi=no`;
     }
   }
 }

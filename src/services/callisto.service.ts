@@ -32,7 +32,7 @@ export class CallistoService {
           const transcript = result[0].transcript.trim().toLocaleLowerCase();
 
           if (result.isFinal) {
-            this.onResulTranscript(transcript);
+            this.onResultTranscript(transcript);
           } else {
             this.onInterimTranscript(transcript);
           }
@@ -75,7 +75,7 @@ export class CallistoService {
     this.interimListeners.forEach(listener => listener(transcript));
   }
 
-  private async onResulTranscript(transcript: string) {
+  private async onResultTranscript(transcript: string) {
     if (!this.currentContext) {
       this.currentContext = this.rootContext;
     }

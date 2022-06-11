@@ -1,16 +1,18 @@
 import { env } from "../env";
 
+const LOCATION_KEY = 'callisto:location';
+
 export class WeatherIntegration {
   savedLocation() {
-    return localStorage.getItem('location');
+    return localStorage.getItem(LOCATION_KEY);
   }
 
   saveLocation(location: string) {
-    localStorage.setItem('location', location);
+    localStorage.setItem(LOCATION_KEY, location);
   }
 
   forgetLocation() {
-    localStorage.removeItem('location');
+    localStorage.removeItem(LOCATION_KEY);
   }
 
   async getWeather(time: string): Promise<string> {
@@ -34,7 +36,7 @@ export class WeatherIntegration {
     if (time === 'today') {
       return `http://api.weatherapi.com/v1/current.json?key=${env.weatherApiKey}&q=${location}&aqi=no`;
     } else if (time === 'tomorrow') {
-      return `http://api.weatherapi.com/v1/forecast.json?key=${env.weatherApiKey}&q=${location}&days=1&aqi=no`;
+      return `http://api.weatherapi.com/v1/forecast.json?key=${env.weatherApiKey}&q=${location}&days=2&aqi=no`;
     }
   }
 }

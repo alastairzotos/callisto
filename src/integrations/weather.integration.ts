@@ -13,13 +13,11 @@ export class WeatherIntegration {
     localStorage.removeItem('location');
   }
 
-  async getWeather(time: string, location?: string): Promise<string> {
-    if (!location) {
-      location = this.savedLocation()!;
-    } else {
-      this.saveLocation(location);
-    }
-    
+  async getWeather(time: string): Promise<string> {
+    return this.goGetWeather(time, this.savedLocation()!);
+  }
+
+  private async goGetWeather(time: string, location: string): Promise<string> {
     const uri = this.generateUri(time, location);
 
     if (!uri) {

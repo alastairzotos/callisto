@@ -3,7 +3,7 @@ import { useCallisto } from './hooks/use-callisto.hook';
 import { funnyPlugin } from './plugins/funny.plugin';
 import { weatherPlugin } from './plugins/weather.plugin';
 import { wikipediaPlugin } from './plugins/wikipedia.plugin';
-import { CallistoService } from './services/callisto.service';
+import { CallistoService } from './callisto/callisto';
 import { speak } from './utils/speech';
 
 const callisto = new CallistoService();

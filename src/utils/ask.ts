@@ -1,4 +1,4 @@
-import { CallistoContext } from "../contexts/context"
+import { CallistoContext } from "../callisto/context"
 import { InteractionResponse } from "../models/context.models"
 import { fleshOutInteractionResponse } from "./interaction-response"
 

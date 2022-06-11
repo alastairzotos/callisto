@@ -1,4 +1,4 @@
-import { CallistoContext } from "../contexts/context";
+import { CallistoContext } from "./context";
 import { ResponseListener, TranscriptListener, GenericListener, GenericPromiseListener } from "../models/context.models";
 import { CallistoPlugin } from "../models/service.models";
 import { WebkitSpeechRecognition } from "../models/speech.models";

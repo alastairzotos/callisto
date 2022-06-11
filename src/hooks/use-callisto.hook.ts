@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { InteractionResponse } from "../models/context.models";
-import { CallistoService } from "../services/callisto.service";
+import { CallistoService } from "../callisto/callisto";
 
 export const useCallisto = (callisto: CallistoService) => {
   const [interim, setInterim] = useState('');

@@ -1,4 +1,4 @@
-import { CallistoContext } from "../contexts/context";
+import { CallistoContext } from "../callisto/context";
 
 export interface InteractionResponse {
   responseText: string;

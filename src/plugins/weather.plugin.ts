@@ -6,19 +6,14 @@ export const weatherPlugin: CallistoPlugin = ctx => {
   ctx
     .addInteraction("forget my location", async () => {
       weatherIntegration.forgetLocation();
-
-      return { responseText: 'Forgot location' };
+      return 'Forgot location';
     })
 
     .addInteraction("what's the weather like( today| tomorrow)?", async ([time = 'today']) => {
       if (!!weatherIntegration.savedLocation()) {
-        return {
-          responseText: await weatherIntegration.getWeather(time)
-        }
+        return await weatherIntegration.getWeather(time)
       } else {
-        return ask(ctx, "Where do you live?", async reponse => ({
-          responseText: await weatherIntegration.getWeather(time, reponse),
-        }))
+        return ask(ctx, "Where do you live?", async reponse => await weatherIntegration.getWeather(time, reponse))
       }
     })
 }

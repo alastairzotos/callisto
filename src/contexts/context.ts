@@ -22,8 +22,8 @@ export class CallistoContext {
 
         return {
           error: false,
-          matchingContext: interactionResponse.context || this,
-          interactionResponse,
+          matchingContext: typeof interactionResponse === 'string' ? this : interactionResponse.context,
+          interactionResponse: typeof interactionResponse === 'string' ? { responseText: interactionResponse } : interactionResponse,
         }
       }
     }

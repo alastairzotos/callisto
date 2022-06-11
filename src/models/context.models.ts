@@ -6,7 +6,7 @@ export interface InteractionResponse {
   context?: CallistoContext;
 }
 
-export type InteractionHandler = (args: string[]) => Promise<InteractionResponse>;
+export type InteractionHandler = (args: string[]) => Promise<InteractionResponse | string>;
 
 export interface Interaction {
   regex: RegExp;

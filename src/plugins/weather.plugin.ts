@@ -1,4 +1,3 @@
-
 import { CallistoContext } from "../contexts/context";
 import { weatherIntegration } from "../integrations/weather.integration"
 import { CallistoPlugin } from "../models/service.models"

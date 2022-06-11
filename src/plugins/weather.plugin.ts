@@ -13,7 +13,7 @@ export const weatherPlugin: CallistoPlugin = ctx => {
       if (!!weatherIntegration.savedLocation()) {
         return await weatherIntegration.getWeather(time)
       } else {
-        return ask(ctx, "Where do you live?", async reponse => await weatherIntegration.getWeather(time, reponse))
+        return ask(ctx, "Where do you live?", async location => await weatherIntegration.getWeather(time, location))
       }
     })
 }

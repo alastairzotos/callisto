@@ -25,13 +25,13 @@ coreContext
     }
   })
 
-  .addInteraction("tell me about (.*)", async ([topic]) => {
+  .addInteraction("tell me about (.+)", async ([topic]) => {
     return {
       responseText: await wikipediaIntegration.getSummary(topic)
     }
   })
 
-  .addInteraction("tell (.*) to go f\\*\\*\\* himself", async ([name]) => {
+  .addInteraction("tell (.+) to go f\\*\\*\\* himself", async ([name]) => {
     return {
       responseText: `Go fuck yourself ${name}`
     }

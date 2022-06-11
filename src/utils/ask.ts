@@ -1,9 +1,17 @@
 import { CallistoContext } from "../contexts/context"
 import { InteractionResponse } from "../models/context.models"
 
-export const ask = (ctx: CallistoContext, question: string, onResponse: (response: string) => Promise<InteractionResponse>): InteractionResponse => {
+export const ask = (
+  ctx: CallistoContext,
+  question: string,
+  onResponse: (response: string) => Promise<InteractionResponse>,
+  goToParentContextOnceFinished = true,
+): InteractionResponse => {
   return {
     responseText: question,
-    context: ctx.addInteraction('(.*)', async ([response]) => await onResponse(response)),
+    context: ctx.addInteraction('(.*)', async ([response]) => ({
+      ...await onResponse(response),
+      goToParentContextOnceFinished
+    })),
   }
 }

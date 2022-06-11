@@ -18,7 +18,6 @@ export const weatherPlugin: CallistoPlugin = ctx => {
       } else {
         return ask(ctx, "Where do you live?", async reponse => ({
           responseText: await weatherIntegration.getWeather(time, reponse),
-          goToParentContextOnceFinished: true,
         }))
       }
     })

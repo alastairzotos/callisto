@@ -25,7 +25,7 @@ export class CallistoService {
       this.recognition = new webkitSpeechRecognition();
 
       if (this.recognition) {
-        this.recognition.continuous = true;
+        // this.recognition.continuous = true;
         this.recognition.interimResults = true;
         this.recognition.lang = 'en-US';
 
@@ -40,6 +40,8 @@ export class CallistoService {
             this.onInterimTranscript(transcript);
           }
         };
+
+        this.recognition.onend = () => this.recognition?.start();
       }
     }
   }

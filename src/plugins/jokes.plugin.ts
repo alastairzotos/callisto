@@ -9,11 +9,18 @@ export const jokesPlugin: CallistoPlugin = ctx => {
     return {
       responseText: joke,
       context: new CallistoContext(ctx)
-        .addInteraction('tell me another one', async () => await jokesIntegration.getJoke())
-        .addInteraction('and another one', async () => await jokesIntegration.getJoke())
-        .addInteraction('and another', async () => await jokesIntegration.getJoke())
-        .addInteraction('another', async () => await jokesIntegration.getJoke())
-        .addInteraction('another one', async () => await jokesIntegration.getJoke())
+        .addInteraction(
+          [
+            'tell me another one',
+            'and another one',
+            'and another',
+            'another',
+            'another one',
+            'another joke',
+            'tell me another joke',
+          ],
+          async () => await jokesIntegration.getJoke()
+        )
     };
   });
 }

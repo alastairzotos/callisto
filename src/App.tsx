@@ -25,7 +25,7 @@ callisto.addResponseListener(async response => await speak(response.responseText
 callisto.addNoMatchListener(async () => await speak("Sorry, I don't understand."))
 
 const App: React.FC = () => {
-  const { listening, interim, result, loading, noMatch, response } = useCallisto(callisto);
+  const { enabled, listening, interim, result, loading, noMatch, response } = useCallisto(callisto);
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -52,6 +52,7 @@ const App: React.FC = () => {
             onMouseUp={() => callisto.stopRecognition()}
             onTouchStart={() => callisto.startRecognition()}
             onTouchEnd={() => callisto.stopRecognition()}
+            disabled={!enabled}
           >
             {listening ? 'Listening' : 'Listen'}
           </Button>

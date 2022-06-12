@@ -4,6 +4,7 @@ import { CallistoService } from "../callisto/callisto";
 
 export const useCallisto = (callisto: CallistoService) => {
   const [listening, setListening] = useState(false);
+  const [enabled, setEnabled] = useState(true);
   const [interim, setInterim] = useState('');
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,7 +36,8 @@ export const useCallisto = (callisto: CallistoService) => {
     callisto.addWaitingListener(() => setLoading(true));
     callisto.addNoMatchListener(handleSetNoMatch);
     callisto.addResponseListener(handleSetResponse);
+    callisto.addEnabledListener(setEnabled);
   }, []);
 
-  return { listening, interim, result, loading, noMatch, response };
+  return { enabled, listening, interim, result, loading, noMatch, response };
 }

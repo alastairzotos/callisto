@@ -24,3 +24,4 @@ export type GenericPromiseListener = () => Promise<void | unknown>;
 export type TranscriptListener = (transcript: string) => void;
 export type ResponseListener = (response: InteractionResponse) => Promise<void | unknown>;
 export type ListeningListener = (listening: boolean) => void;
+export type EnabledListener = (listening: boolean) => void;

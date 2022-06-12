@@ -1,5 +1,5 @@
 import { CallistoContext } from "./context";
-import { ResponseListener, TranscriptListener, GenericListener, GenericPromiseListener, ListeningListener } from "../models/context.models";
+import { ResponseListener, TranscriptListener, GenericListener, GenericPromiseListener, ListeningListener, EnabledListener } from "../models/context.models";
 import { CallistoPlugin } from "../models/service.models";
 import { WebkitSpeechRecognition } from "../models/speech.models";
 import { IWindow } from "../models/window.model";
@@ -12,6 +12,7 @@ export class CallistoService {
   private noMatchListeners: GenericPromiseListener[] = [];
   private responseListeners: ResponseListener[] = [];
   private listeningListeners: ListeningListener[] = [];
+  private enabledListeners: EnabledListener[] = [];
 
   private rootContext = new CallistoContext();
   private currentContext?: CallistoContext = this.rootContext;
@@ -58,7 +59,7 @@ export class CallistoService {
       setTimeout(() => {
         this.recognition?.abort();
         this.broadcastListeningStatus(false);
-      }, 2000);
+      }, 3000);
     }
   }
 
@@ -95,6 +96,15 @@ export class CallistoService {
     this.listeningListeners.push(listener);
   }
 
+  addEnabledListener(listener: EnabledListener) {
+    this.enabledListeners.push(listener);
+  }
+
+  private setRecognitionEnabled(enabled: boolean) {
+    this.recognitionEnabled = enabled;
+    this.enabledListeners.forEach(listener => listener(enabled));
+  }
+
   private broadcastListeningStatus(listening: boolean) {
     this.listeningListeners.forEach(listener => listener(listening));
   }
@@ -109,7 +119,7 @@ export class CallistoService {
     }
 
     this.recognition?.abort();
-    this.recognitionEnabled = false;
+    this.setRecognitionEnabled(false);
     this.broadcastListeningStatus(false);
 
     this.resultListeners.forEach(listener => listener(transcript));
@@ -131,6 +141,6 @@ export class CallistoService {
       }
     }
 
-    this.recognitionEnabled = true;
+    this.setRecognitionEnabled(true);
   }
 }

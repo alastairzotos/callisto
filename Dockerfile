@@ -39,7 +39,7 @@ RUN yarn global add turbo
 COPY turbo.json package.json yarn.lock ./
 COPY apps/callisto apps/callisto
 COPY libs libs
-RUN turbo run build --scope=callisto --include-dependencies
+# RUN turbo run build --scope=callisto --include-dependencies
 
 EXPOSE 3000
 CMD yarn workspace callisto start

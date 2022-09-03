@@ -22,5 +22,5 @@ jobs:
           context: .
           tags: bitmetro/callisto:${{ github.ref_name }}
           build-args: |
-            REACT_APP_PROD=true
+            NEXT_PUBLIC_PRODUCTION=true
             NEXT_PUBLIC_WEATHER_API_KEY=${{ secrets.NEXT_PUBLIC_WEATHER_API_KEY }}

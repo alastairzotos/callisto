@@ -25,6 +25,12 @@
 FROM node:14-slim
 WORKDIR /app
 
+ARG NEXT_PUBLIC_PRODUCTION
+ENV NEXT_PUBLIC_PRODUCTION $NEXT_PUBLIC_PRODUCTION
+
+ARG NEXT_PUBLIC_WEATHER_API_KEY
+ENV NEXT_PUBLIC_WEATHER_API_KEY $NEXT_PUBLIC_WEATHER_API_KEY
+
 # Install dependencies
 COPY package.json yarn.lock ./
 COPY apps/callisto/package.json apps/callisto/package.json
@@ -39,7 +45,7 @@ RUN yarn global add turbo
 COPY turbo.json package.json yarn.lock ./
 COPY apps/callisto apps/callisto
 COPY libs libs
-# RUN turbo run build --scope=callisto --include-dependencies
+RUN turbo run build --scope=callisto --include-dependencies
 
 EXPOSE 3000
 CMD yarn workspace callisto start

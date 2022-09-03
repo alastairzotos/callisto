@@ -22,7 +22,7 @@ export class CallistoService {
   private recognitionEnabled: boolean = true;
 
   constructor() {
-    if ('webkitSpeechRecognition' in window) {
+    if (typeof window !== undefined && 'webkitSpeechRecognition' in window) {
       const { webkitSpeechRecognition } = window as unknown as IWindow;
 
       this.recognition = new webkitSpeechRecognition();

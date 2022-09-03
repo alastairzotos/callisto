@@ -1,11 +1,10 @@
-const mainVoice = speechSynthesis.getVoices().find(voice => voice.name === 'Samantha');
-
 export interface SpeechResult {
   promise: Promise<SpeechSynthesisEvent>;
   cancel: () => void;
 }
 
 export const speak = (words: string): SpeechResult => {
+  const mainVoice = speechSynthesis.getVoices().find(voice => voice.name === 'Samantha');
   const utterance = new SpeechSynthesisUtterance(words);
   utterance.voice = mainVoice!;
 

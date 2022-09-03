@@ -1,0 +1,17 @@
+{
+	"include": [
+		"src"
+	],
+	"compilerOptions": {
+    "moduleResolution": "node",
+		"target": "es5",
+		"noImplicitAny": false,
+		"outDir": "dist",
+		"rootDir": "src",
+		"sourceMap": false,
+		"declaration": true,
+		"experimentalDecorators": false,
+		"emitDecoratorMetadata": false,
+		"baseUrl": "src"
+	}
+}

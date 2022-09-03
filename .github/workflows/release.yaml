@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Login
+        run: docker login -u bitmetro -p ${{ secrets.DOCKER_PASSWORD }} docker.io
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          tags: bitmetro/callisto:${{ github.ref_name }}
+          build-args: |
+            REACT_APP_PROD=true
+            REACT_APP_WEATHER_API_KEY=${{ secrets.REACT_APP_WEATHER_API_KEY }}

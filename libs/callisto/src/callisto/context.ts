@@ -1,5 +1,5 @@
 import { Interaction, InteractionHandler, InteractionHandlerResponse } from "../models/callisto.models";
-import { fleshOutInteractionResponse } from "../utils/interaction-response";
+import { simplifyInteractionResponse } from "../utils/interaction-response";
 
 export class CallistoContext {
   private interactions: Interaction[] = [];
@@ -13,7 +13,7 @@ export class CallistoContext {
       const match = interaction.regex.exec(input);
       
       if (match) {
-        const interactionResponse = fleshOutInteractionResponse(
+        const interactionResponse = simplifyInteractionResponse(
           await interaction.handler([...match?.slice(1).map(i => i ? i.trim().toLocaleLowerCase() : i)])
         );
 

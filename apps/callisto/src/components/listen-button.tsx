@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, styled } from '@mui/material';
 import { SpeechInputAdapter } from '@bitmetro/callisto';
 
-import { useSpeechInput } from '../hooks/use-speech-input.hook';
 import { Prompts } from './prompts';
 
 interface Props {
@@ -17,7 +16,15 @@ const StyledButton = styled(Button)(() => ({
 }))
 
 export const ListenButton: React.FC<Props> = ({ speechInputAdapter, onCancel }) => {
-  const { enabled, listening } = useSpeechInput(speechInputAdapter);
+  const [listening, setListening] = useState(false);
+  const [enabled, setEnabled] = useState(true);
+
+  useEffect(() => {
+    speechInputAdapter.addEventHandlers({
+      onListening: setListening,
+      onEnabled: setEnabled,
+    })
+  }, []);
 
   return (
     <StyledButton

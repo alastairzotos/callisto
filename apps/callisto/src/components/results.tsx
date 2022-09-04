@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Typography, styled } from '@mui/material';
-import { SpeechInputAdapter } from '@bitmetro/callisto';
-
-import { useSpeechInput } from '../hooks/use-speech-input.hook';
+import { CallistoOutputAdapter, SpeechInputAdapter } from '@bitmetro/callisto';
 
 interface Props {
   speechInputAdapter: SpeechInputAdapter;
@@ -17,7 +15,23 @@ const Response = styled(Typography)(() => ({
 }))
 
 export const Results: React.FC<Props> = ({ speechInputAdapter }) => {
-  const { interim, result, matchFound, response } = useSpeechInput(speechInputAdapter);
+  const [interim, setInterim] = useState('');
+  const [result, setResult] = useState('');
+  const [matchFound, setMatchFound] = useState(true);
+  const [response, setResponse] = useState('');
+
+  useEffect(() => {
+    const outputAdapter = new CallistoOutputAdapter();
+    outputAdapter.handleMatchingInteractionFound = async found => setMatchFound(found);
+    outputAdapter.handleResponse = async response => setResponse(response.responseText);
+    
+    speechInputAdapter.callisto.registerOutputAdapter(outputAdapter);
+
+    speechInputAdapter.addEventHandlers({
+      onInterim: setInterim,
+      onResult: setResult,
+    })
+  }, []);
 
   return (
     <Wrapper>

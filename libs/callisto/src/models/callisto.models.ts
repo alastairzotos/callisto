@@ -39,3 +39,12 @@ export class CallistoInputAdapter extends CallistoAdapter {
     this.callisto.handleInput(input);
   }
 }
+
+export class CallistoOutputAdapter extends CallistoAdapter {
+  constructor(public readonly noMatchResponse = "Sorry, I don't understand.") {
+    super();
+  }
+
+  async handleResponse(response: InteractionResponse): Promise<void> {}
+  async handleMatchingInteractionFound(found: boolean): Promise<void> {}
+}

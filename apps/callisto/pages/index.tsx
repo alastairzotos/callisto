@@ -1,8 +1,8 @@
 import Head from 'next/head'
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CallistoService, speak, SpeechResult, SpeechInputAdapter } from '@bitmetro/callisto';
+import { CallistoService, speak, SpeechResult, SpeechInputAdapter, SpeechOutputAdapter } from '@bitmetro/callisto';
 
 import { ListenButton } from '../src/components/listen-button';
 import { Results } from '../src/components/results';
@@ -19,31 +19,26 @@ const darkTheme = createTheme({
   }
 });
 
-const callisto = new CallistoService();
-callisto.applyPlugins(weatherPlugin, wikipediaPlugin, jokesPlugin, funnyPlugin)
-
 const App: React.FC = () => {
-  const [speechInputAdapter, setSpeechInputAdapter] = useState<SpeechInputAdapter | null>(null);
   const [speechResponse, setSpeechResponse] = useState<SpeechResult | null>(null);
+  const [speechInputAdapter, setSpeechInputAdapter] = useState<SpeechInputAdapter | null>(null);
+  const [speechOutputAdapter, setSpeechOutputAdapter] = useState<SpeechOutputAdapter | null>(null);
 
   useEffect(() => {
     if (typeof window !== undefined) {
-      const speechAdapter = new SpeechInputAdapter()
-      callisto.addInputAdapter(speechAdapter);
+      const callisto = new CallistoService();
+      callisto.applyPlugins(weatherPlugin, wikipediaPlugin, jokesPlugin, funnyPlugin)
 
-      callisto.addEventHandlers({
-        onMatchingInteractionFound: async match => !match && await handleResponse("Sorry, I don't understand."),
-        onResponse: async response => await handleResponse(response.responseText),
-      })
+      const inputAdapter = new SpeechInputAdapter()
+      callisto.registerInputAdapter(inputAdapter);
 
-      setSpeechInputAdapter(speechAdapter);
+      const outputAdapter = new SpeechOutputAdapter();
+      callisto.registerOutputAdapter(outputAdapter);
+      outputAdapter.onSpeaking(setSpeechResponse);
+
+      setSpeechInputAdapter(inputAdapter);
+      setSpeechOutputAdapter(outputAdapter);
     }
-  }, [])
-
-  const handleResponse = useCallback(async (text: string) => {
-    const result = speak(text);
-    setSpeechResponse(result);
-    await result.promise;
   }, [])
 
   const handleCancelClick = () => {
@@ -62,16 +57,14 @@ const App: React.FC = () => {
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
 
-        {!!speechInputAdapter && (
+        {(!!speechInputAdapter && !!speechOutputAdapter) && (
           <Container maxWidth="sm">
             <div style={{ height: 'calc(100vh - 180px)', padding: 20 }}>
               <Logo />
               <Results speechInputAdapter={speechInputAdapter} />
             </div>
 
-            <div>
-              <ListenButton speechInputAdapter={speechInputAdapter} onCancel={handleCancelClick} />
-            </div>
+            <ListenButton speechInputAdapter={speechInputAdapter} onCancel={handleCancelClick} />
           </Container>
         )}
       </ThemeProvider>

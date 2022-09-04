@@ -1,3 +1,4 @@
+import { CallistoService } from "../callisto/callisto";
 import { CallistoContext } from "../callisto/context";
 
 export interface InteractionResponse {
@@ -19,9 +20,22 @@ export interface InteractionHandlerResponse {
   matchingContext?: CallistoContext;
 }
 
-export type GenericListener = () => void;
-export type GenericPromiseListener = () => Promise<void | unknown>;
-export type TranscriptListener = (transcript: string) => void;
-export type ResponseListener = (response: InteractionResponse) => Promise<void | unknown>;
-export type ListeningListener = (listening: boolean) => void;
-export type EnabledListener = (listening: boolean) => void;
+export interface CallistoPluginInfo {
+  prompts: string[];
+}
+
+export type CallistoPlugin = (ctx: CallistoContext) => CallistoPluginInfo;
+
+export class CallistoAdapter {
+  public callisto: CallistoService;
+
+  register(callisto: CallistoService) {
+    this.callisto = callisto;
+  }
+}
+
+export class CallistoInputAdapter extends CallistoAdapter {
+  handleInput(input: string): void {
+    this.callisto.handleInput(input);
+  }
+}

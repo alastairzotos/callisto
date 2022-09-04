@@ -1,9 +1,8 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import React, { useCallback, useEffect, useState } from 'react';
 import { Container, CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CallistoService, speak, SpeechResult } from '@bitmetro/callisto';
+import { CallistoService, speak, SpeechResult, SpeechInputAdapter } from '@bitmetro/callisto';
 
 import { ListenButton } from '../src/components/listen-button';
 import { Results } from '../src/components/results';
@@ -20,19 +19,24 @@ const darkTheme = createTheme({
   }
 });
 
+const callisto = new CallistoService();
+callisto.applyPlugins(weatherPlugin, wikipediaPlugin, jokesPlugin, funnyPlugin)
+
 const App: React.FC = () => {
-  const [callisto, setCallisto] = useState<CallistoService | null>(null);
+  const [speechInputAdapter, setSpeechInputAdapter] = useState<SpeechInputAdapter | null>(null);
   const [speechResponse, setSpeechResponse] = useState<SpeechResult | null>(null);
 
   useEffect(() => {
     if (typeof window !== undefined) {
-      const callistoInstance = new CallistoService();
-      callistoInstance.applyPlugins(weatherPlugin, wikipediaPlugin, jokesPlugin, funnyPlugin)
+      const speechAdapter = new SpeechInputAdapter()
+      callisto.addInputAdapter(speechAdapter);
 
-      callistoInstance.addNoMatchListener(async () => await handleResponse("Sorry, I don't understand."))
-      callistoInstance.addResponseListener(async response => await handleResponse(response.responseText))
+      callisto.addEventHandlers({
+        onMatchingInteractionFound: async match => !match && await handleResponse("Sorry, I don't understand."),
+        onResponse: async response => await handleResponse(response.responseText),
+      })
 
-      setCallisto(callistoInstance);
+      setSpeechInputAdapter(speechAdapter);
     }
   }, [])
 
@@ -58,15 +62,15 @@ const App: React.FC = () => {
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
 
-        {callisto && (
+        {!!speechInputAdapter && (
           <Container maxWidth="sm">
             <div style={{ height: 'calc(100vh - 180px)', padding: 20 }}>
               <Logo />
-              <Results callisto={callisto!} />
+              <Results speechInputAdapter={speechInputAdapter} />
             </div>
 
             <div>
-              <ListenButton callisto={callisto!} onCancel={handleCancelClick} />
+              <ListenButton speechInputAdapter={speechInputAdapter} onCancel={handleCancelClick} />
             </div>
           </Container>
         )}

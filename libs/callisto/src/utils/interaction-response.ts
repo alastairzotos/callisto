@@ -1,4 +1,4 @@
-import { InteractionResponse } from "../models/context.models";
+import { InteractionResponse } from "../models/callisto.models";
 
 export const fleshOutInteractionResponse = (response: InteractionResponse | string): InteractionResponse => {
   if (typeof response === 'string') {

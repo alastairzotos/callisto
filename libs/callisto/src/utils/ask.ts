@@ -1,5 +1,5 @@
 import { CallistoContext } from "../callisto/context"
-import { InteractionResponse } from "../models/context.models"
+import { InteractionResponse } from "../models/callisto.models"
 import { fleshOutInteractionResponse } from "./interaction-response"
 
 export const ask = (

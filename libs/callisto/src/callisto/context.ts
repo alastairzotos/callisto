@@ -1,4 +1,4 @@
-import { Interaction, InteractionHandler, InteractionHandlerResponse } from "../models/context.models";
+import { Interaction, InteractionHandler, InteractionHandlerResponse } from "../models/callisto.models";
 import { fleshOutInteractionResponse } from "../utils/interaction-response";
 
 export class CallistoContext {
@@ -6,11 +6,11 @@ export class CallistoContext {
 
   constructor(public parent?: CallistoContext) {}
 
-  async handleTranscript(transcript: string): Promise<InteractionHandlerResponse> {
-    const interaction = this.interactions.find(interaction => interaction.regex.test(transcript));
+  async handleInput(input: string): Promise<InteractionHandlerResponse> {
+    const interaction = this.interactions.find(interaction => interaction.regex.test(input));
     
     if (interaction) {
-      const match = interaction.regex.exec(transcript);
+      const match = interaction.regex.exec(input);
       
       if (match) {
         const interactionResponse = fleshOutInteractionResponse(
@@ -26,7 +26,7 @@ export class CallistoContext {
     }
 
     if (this.parent) {
-      return this.parent.handleTranscript(transcript);
+      return this.parent.handleInput(input);
     }
 
     return { error: true }

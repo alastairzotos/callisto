@@ -1,11 +1,11 @@
-import React from 'react';
-import { LinearProgress, Typography, styled } from '@mui/material';
-import { CallistoService } from '@bitmetro/callisto';
+import React, { useEffect, useState } from 'react';
+import { Typography, styled } from '@mui/material';
+import { SpeechInputAdapter } from '@bitmetro/callisto';
 
-import { useCallisto } from '../hooks/use-callisto.hook';
+import { useSpeechInput } from '../hooks/use-speech-input.hook';
 
 interface Props {
-  callisto: CallistoService;
+  speechInputAdapter: SpeechInputAdapter;
 }
 
 const Wrapper = styled('div')(() => ({
@@ -16,16 +16,8 @@ const Response = styled(Typography)(() => ({
   fontFamily: 'monospace'
 }))
 
-const ResponseWrapper = styled('div')(() => ({
-  display: 'flex'
-}))
-
-const ResponseColumn = styled('div')(() => ({
-  width: '90%'
-}))
-
-export const Results: React.FC<Props> = ({ callisto }) => {
-  const { interim, result, loading, noMatch, response } = useCallisto(callisto);
+export const Results: React.FC<Props> = ({ speechInputAdapter }) => {
+  const { interim, result, matchFound, response } = useSpeechInput(speechInputAdapter);
 
   return (
     <Wrapper>
@@ -35,12 +27,7 @@ export const Results: React.FC<Props> = ({ callisto }) => {
           : <Typography>{interim}</Typography>
       }
 
-      {loading && <LinearProgress />}
-
-      <>
-        {noMatch && <Response>No match</Response>}
-        {response && <Response>{response}</Response>}
-      </>
+      {!matchFound ? <Response>No match</Response> : response && <Response>{response}</Response>}
     </Wrapper>
   )
 }

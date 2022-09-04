@@ -2,7 +2,7 @@ import Head from 'next/head'
 import React, { useEffect, useState } from 'react';
 import { Container, CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CallistoService, speak, SpeechResult, SpeechInputAdapter, SpeechOutputAdapter } from '@bitmetro/callisto';
+import { CallistoService, SpeechResult, SpeechInputAdapter, SpeechOutputAdapter } from '@bitmetro/callisto';
 
 import { ListenButton } from '../src/components/listen-button';
 import { Results } from '../src/components/results';

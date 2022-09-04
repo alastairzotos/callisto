@@ -20,11 +20,7 @@ export interface InteractionHandlerResponse {
   matchingContext?: CallistoContext;
 }
 
-export interface CallistoPluginInfo {
-  prompts: string[];
-}
-
-export type CallistoPlugin = (ctx: CallistoContext) => CallistoPluginInfo;
+export type CallistoPlugin = (ctx: CallistoContext) => void;
 
 export class CallistoAdapter {
   public callisto: CallistoService;

@@ -10,12 +10,9 @@ export const wikipediaPlugin: CallistoPlugin = ctx => {
     return {
       responseText: sentences[0],
       context: (new CallistoContext(ctx))
+        .addPrompts(['Shall I continue?', 'Do you want to know more?', 'Do you want me to tell you more?'])
         .addInteraction(
-          [
-            'tell me more',
-            'continue',
-            'more'
-          ],
+          ['tell me more', 'continue', 'more'],
           async () => {
             if (sentenceIndex >= sentences.length - 1) {
               return `That's all I can tell you about ${topic}`
@@ -27,19 +24,17 @@ export const wikipediaPlugin: CallistoPlugin = ctx => {
     }
   };
 
-  ctx.addInteraction("tell me about (.+)", handler);
-  ctx.addInteraction("what is a (.+)", handler);
-  ctx.addInteraction("what is the (.+)", handler);
-  ctx.addInteraction("what is (.+)", handler);
-  ctx.addInteraction("what was a (.+)", handler);
-  ctx.addInteraction("what was the (.+)", handler);
-  ctx.addInteraction("what was (.+)", handler);
-  ctx.addInteraction("who was (.+)", handler);
-  ctx.addInteraction("who is (.+)", handler);
-  ctx.addInteraction("where was (.+)", handler);
-  ctx.addInteraction("where is (.+)", handler);
-
-  return {
-    prompts: ['Try "tell me about Rome"', 'Ask me about Einstein']
-  }
+  ctx
+    .addPrompts(['Try "tell me about Rome"', 'Ask me about Einstein'])
+    .addInteraction("tell me about (.+)", handler)
+    .addInteraction("what is a (.+)", handler)
+    .addInteraction("what is the (.+)", handler)
+    .addInteraction("what is (.+)", handler)
+    .addInteraction("what was a (.+)", handler)
+    .addInteraction("what was the (.+)", handler)
+    .addInteraction("what was (.+)", handler)
+    .addInteraction("who was (.+)", handler)
+    .addInteraction("who is (.+)", handler)
+    .addInteraction("where was (.+)", handler)
+    .addInteraction("where is (.+)", handler)
 }

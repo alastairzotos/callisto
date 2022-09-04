@@ -1,6 +1,6 @@
 import { CallistoContext } from "./context";
 import { CallistoInputAdapter, CallistoOutputAdapter, InteractionResponse } from "../models/callisto.models";
-import { CallistoPlugin, CallistoPluginInfo } from "../models";
+import { CallistoPlugin } from "../models";
 import { stripInputOfExtraChars } from '../utils';
 
 export interface CallistoEventHandlers {
@@ -11,21 +11,28 @@ export class CallistoService {
   private rootContext = new CallistoContext();
   private currentContext?: CallistoContext = this.rootContext;
   
-  private plugins: CallistoPluginInfo[] = [];
   private onHandlingInputListeners: Array<(handlingInput: boolean) => void> = [];
   private inputAdapters: CallistoInputAdapter[] = [];
   private outputAdapters: CallistoOutputAdapter[] = [];
 
   applyPlugin(plugin: CallistoPlugin) {
-    this.plugins.push(plugin(this.rootContext));
+    plugin(this.rootContext);
   }
 
   applyPlugins(...plugins: CallistoPlugin[]) {
     plugins.forEach(plugin => this.applyPlugin(plugin));
   }
 
-  getAllPrompts(): string[] {
-    return this.plugins.map(plugin => plugin.prompts).flat()
+  getContextChain(): CallistoContext[] {
+    const chain: CallistoContext[] = [];
+    let context = this.currentContext;
+
+    while (context) {
+      chain.push(context);
+      context = context.parent;
+    }
+
+    return chain;
   }
 
   onHandlingInput(listener: (handlingInput: boolean) => void) {

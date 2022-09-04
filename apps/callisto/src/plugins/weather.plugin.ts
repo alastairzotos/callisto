@@ -3,6 +3,7 @@ import { CallistoPlugin, ask } from '@bitmetro/callisto';
 
 export const weatherPlugin: CallistoPlugin = ctx => {
   ctx
+    .addPrompts(['Try asking about the weather', 'Try asking for the weather in Beijing', 'Ask for the weather in New York'])
     .addInteraction("forget my location", async () => {
       weatherIntegration.forgetLocation();
       return 'Forgot location';
@@ -22,8 +23,4 @@ export const weatherPlugin: CallistoPlugin = ctx => {
         })
       }
     })
-
-  return {
-    prompts: ['Try asking about the weather', 'Try asking for the weather in Beijing']
-  }
 }

@@ -17,7 +17,8 @@ export const Prompts: React.FC<Props> = ({ callisto, cycleDuration }) => {
   const [promptIndex, setPromptIndex] = useState(0);
   const promptRef = useRef() as MutableRefObject<HTMLSpanElement>;
 
-  const prompts = callisto.getAllPrompts();
+  const contextChain = callisto.getContextChain();
+  const prompts = contextChain.map(ctx => ctx.getPrompts()).flat();
 
   useInterval(() => {
     const next = Math.floor(Math.random() * prompts.length);

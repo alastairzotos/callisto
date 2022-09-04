@@ -3,6 +3,7 @@ import { simplifyInteractionResponse } from "../utils/interaction-response";
 
 export class CallistoContext {
   private interactions: Interaction[] = [];
+  private prompts: string[] = [];
 
   constructor(public parent?: CallistoContext) {}
 
@@ -49,5 +50,15 @@ export class CallistoContext {
     Object.keys(interactions).forEach(regex => this.addInteraction(regex, interactions[regex]));
 
     return this;
+  }
+
+  addPrompts(promps: string[]) {
+    this.prompts.push(...promps);
+
+    return this;
+  }
+
+  getPrompts() {
+    return this.prompts;
   }
 }

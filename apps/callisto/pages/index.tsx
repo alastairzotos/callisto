@@ -8,7 +8,6 @@ import { ListenButton } from '../src/components/listen-button';
 import { Results } from '../src/components/results';
 import { Logo } from '../src/components/logo';
 
-import { funnyPlugin } from '../src/plugins/funny.plugin';
 import { weatherPlugin } from '../src/plugins/weather.plugin';
 import { wikipediaPlugin } from '../src/plugins/wikipedia.plugin';
 import { jokesPlugin } from '../src/plugins/jokes.plugin';
@@ -27,7 +26,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (typeof window !== undefined) {
       const callisto = new CallistoService();
-      callisto.applyPlugins(weatherPlugin, wikipediaPlugin, jokesPlugin, funnyPlugin)
+      callisto.applyPlugins(weatherPlugin, wikipediaPlugin, jokesPlugin)
 
       const inputAdapter = new SpeechInputAdapter()
       callisto.registerInputAdapter(inputAdapter);

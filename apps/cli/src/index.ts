@@ -32,4 +32,10 @@ callisto.registerOutputAdapter(new CliOutputAdapter());
 
 const inputAdapter = new CliInputAdapter();
 callisto.registerInputAdapter(inputAdapter);
-inputAdapter.start();
+
+/*
+  Uncomment the line below to start
+  Run "yarn dev" in the cli project folder
+*/
+
+// inputAdapter.start();

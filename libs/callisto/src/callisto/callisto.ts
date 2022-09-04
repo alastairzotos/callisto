@@ -1,6 +1,7 @@
 import { CallistoContext } from "./context";
 import { CallistoInputAdapter, CallistoOutputAdapter, InteractionResponse } from "../models/callisto.models";
 import { CallistoPlugin, CallistoPluginInfo } from "../models";
+import { stripInputOfExtraChars } from '../utils';
 
 export interface CallistoEventHandlers {
   onHandlingInput?: (handlingInput: boolean) => void;
@@ -48,7 +49,7 @@ export class CallistoService {
       this.currentContext = this.rootContext;
     }
 
-    const response = await this.currentContext.handleInput(input);
+    const response = await this.currentContext.handleInput(stripInputOfExtraChars(input));
 
     if (response.error) {
       await Promise.all(this.outputAdapters.map(adapter => adapter.handleMatchingInteractionFound(false)));

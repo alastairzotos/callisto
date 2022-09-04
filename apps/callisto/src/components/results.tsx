@@ -30,6 +30,7 @@ export const Results: React.FC<Props> = ({ speechInputAdapter }) => {
     speechInputAdapter.addEventHandlers({
       onInterim: setInterim,
       onResult: setResult,
+      onListening: () => setResponse('')
     })
   }, []);
 

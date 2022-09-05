@@ -1,5 +1,4 @@
 import { CEventEmitter } from '../utils';
-import { InteractionResponse } from '../models/callisto.models';
 
 export interface SpeechResult {
   promise: Promise<SpeechSynthesisEvent>;
@@ -11,8 +10,8 @@ export class SpeechOutputAdapter {
 
   constructor(private readonly noMatchResponse: string = "Sorry, I don't understand") {}
 
-  async speakResponse(response: InteractionResponse): Promise<void> {
-    const result = this.speak(response.responseText);
+  async speakResponse(text: string): Promise<void> {
+    const result = this.speak(text);
     this.onSpeaking.emit(result);
     await result.promise;
     this.onSpeaking.emit(undefined);

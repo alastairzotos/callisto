@@ -9,7 +9,7 @@ const rl = readline.createInterface({
 
 const question = (q: string) => new Promise<string>(resolve => rl.question(q, resolve))
 
-const client = new CallistoClient({ retryTimeout: 3000 });
+const client = new CallistoClient({ host: 'ws://localhost:8080', retryTimeout: 3000 });
 
 const query = async () => client.sendTranscript(await question(`[${chalk.yellow('You')}]: `))
 

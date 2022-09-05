@@ -1,7 +1,7 @@
 import { CallistoResponse, CEventEmitter } from '@bitmetro/callisto';
-import * as WebSocket from 'ws';
 
 interface ConnectionOptions {
+  host: string;
   retryTimeout?: number;
 }
 
@@ -19,7 +19,7 @@ export class CallistoClient {
   }
 
   connect() {
-    this.ws = new WebSocket('ws://localhost:8080');
+    this.ws = new WebSocket(this.connectionOptions.host);
 
     this.ws.addEventListener('open', () => {
       this.onConnected.emit();

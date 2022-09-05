@@ -40,12 +40,6 @@ const App: React.FC = () => {
     }
   }, [])
 
-  const handleCancelClick = () => {
-    if (speechResponse) {
-      speechResponse.cancel();
-    }
-  }
-
   return (
     <div>
       <Head>
@@ -63,7 +57,7 @@ const App: React.FC = () => {
               <Results speechInputAdapter={speechInputAdapter} />
             </div>
 
-            <ListenButton speechInputAdapter={speechInputAdapter} onCancel={handleCancelClick} />
+            <ListenButton speechInputAdapter={speechInputAdapter} onCancel={() => speechResponse?.cancel()} />
           </Container>
         )}
       </ThemeProvider>

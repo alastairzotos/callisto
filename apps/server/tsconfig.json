@@ -1,0 +1,17 @@
+{
+	"include": ["src", "plugins"],
+	"compilerOptions": {
+		"strict": true,
+		"lib": ["ES2015", "DOM"],
+    "moduleResolution": "node",
+		"target": "es5",
+		"noImplicitAny": false,
+		"outDir": "dist",
+		"rootDir": ".",
+		"sourceMap": false,
+		"declaration": true,
+		"experimentalDecorators": false,
+		"emitDecoratorMetadata": false,
+		"baseUrl": "."
+	}
+}

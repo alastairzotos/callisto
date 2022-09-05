@@ -3,11 +3,10 @@ import { parse as parseYaml } from 'yaml';
 import { CallistoContext } from "./context";
 import { ask, stripInputOfExtraChars, CEventEmitter } from '../utils';
 import { CallistoPlugin, ForkProcess, ChildProcess, PluginImport, PluginImportSchema, PluginInteraction, sendAnswer, sendCommand } from '../plugin';
-import { InteractionHandlerResponse } from '../models';
+import { InteractionHandlerResponse, InteractionResponse } from '../models';
 
 export class CallistoService {
   public onProcessing = new CEventEmitter<(processing: boolean) => void>();
-  public onResponse = new CEventEmitter<(response: InteractionHandlerResponse) => Promise<void>>();
 
   private rootContext = new CallistoContext();
   private currentContext?: CallistoContext = this.rootContext;
@@ -106,11 +105,12 @@ export class CallistoService {
     }
 
     const response = await this.currentContext.handleInput(stripInputOfExtraChars(input));
+    let result: InteractionHandlerResponse;
 
     if (response.error) {
-      await this.onResponse.emit({ error: true });
+      result = { error: true };
     } else {
-      await this.onResponse.emit({ error: false, interactionResponse: response.interactionResponse })
+      result = { error: false, interactionResponse: response.interactionResponse };
 
       this.currentContext = response.matchingContext;
 
@@ -120,5 +120,7 @@ export class CallistoService {
     }
 
     this.onProcessing.emit(false);
+
+    return result;
   }
 }

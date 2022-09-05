@@ -24,24 +24,29 @@ const App: React.FC = () => {
   const [speechResponse, setSpeechResponse] = useState<SpeechResult | null>(null);
   const [speechInputAdapter, setSpeechInputAdapter] = useState<SpeechInputAdapter | null>(null);
   const [speechOutputAdapter, setSpeechOutputAdapter] = useState<SpeechOutputAdapter | null>(null);
+  const [error, setError] = useState(false);
+  const [responseText, setResponseText] = useState('');
 
   useEffect(() => {
     if (typeof window !== undefined) {
       callisto.applyPlugins(weatherPlugin, wikipediaPlugin, jokesPlugin)
 
       const inputAdapter = new SpeechInputAdapter();
-      inputAdapter.onResult.attach(transcript => callisto.handleInput(transcript));
+      inputAdapter.onResult.attach(async transcript => {
+        const { error, interactionResponse } = await callisto.handleInput(transcript);
+
+        if (error) {
+          setError(true);
+          await outputAdapter.handleMatchingInteractionFound(false);
+        } else {
+          setError(false);
+          setResponseText(interactionResponse?.responseText!);
+          await outputAdapter.speakResponse(interactionResponse!);
+        }
+      });
 
       const outputAdapter = new SpeechOutputAdapter();
       outputAdapter.onSpeaking(setSpeechResponse);
-
-      callisto.onResponse.attach( async ({ error, interactionResponse }) => {
-        if (error) {
-          await outputAdapter.handleMatchingInteractionFound(false);
-        } else {
-          await outputAdapter.speakResponse(interactionResponse!);
-        }
-      })
 
       setSpeechInputAdapter(inputAdapter);
       setSpeechOutputAdapter(outputAdapter);
@@ -63,7 +68,7 @@ const App: React.FC = () => {
           <Container maxWidth="sm">
             <div style={{ height: 'calc(100vh - 180px)', padding: 20 }}>
               <Logo />
-              <Results callisto={callisto} speechInputAdapter={speechInputAdapter} />
+              <Results speechInputAdapter={speechInputAdapter} error={error} responseText={responseText} />
             </div>
 
             <ListenButton

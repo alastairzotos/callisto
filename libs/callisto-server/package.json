@@ -1,0 +1,22 @@
+{
+  "name": "@bitmetro/callisto-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@bitmetro/callisto": "*",
+    "@bitmetro/callisto-ipc": "*",
+    "typescript": "^4.8.2",
+    "ws": "^8.8.1"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.3"
+  }
+}

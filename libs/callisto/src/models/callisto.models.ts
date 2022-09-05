@@ -1,4 +1,4 @@
-import { CallistoService } from "../callisto/callisto";
+import { Callisto } from "../callisto/callisto";
 import { CallistoContext } from "../callisto/context";
 
 export interface InteractionResponse {
@@ -20,10 +20,15 @@ export interface InteractionHandlerResponse {
   matchingContext?: CallistoContext;
 }
 
-export class CallistoAdapter {
-  public callisto: CallistoService | undefined;
+export interface CallistoResponse {
+  error: boolean;
+  text: string;
+}
 
-  register(callisto: CallistoService) {
+export class CallistoAdapter {
+  public callisto: Callisto | undefined;
+
+  register(callisto: Callisto) {
     this.callisto = callisto;
   }
 }

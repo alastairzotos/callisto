@@ -1,3 +1,4 @@
+import { CEventEmitter } from '../utils';
 import { InteractionResponse } from '../models/callisto.models';
 
 export interface SpeechResult {
@@ -6,18 +7,15 @@ export interface SpeechResult {
 }
 
 export class SpeechOutputAdapter {
-  private onSpeakingListeners: Array<(response: SpeechResult) => void> = [];
+  public onSpeaking = new CEventEmitter<(response?: SpeechResult) => void>();
 
   constructor(private readonly noMatchResponse: string = "Sorry, I don't understand") {}
 
-  onSpeaking(listener: (response: SpeechResult) => void) {
-    this.onSpeakingListeners.push(listener);
-  }
-
   async speakResponse(response: InteractionResponse): Promise<void> {
     const result = this.speak(response.responseText);
-    this.onSpeakingListeners.map(listener => listener(result));
+    this.onSpeaking.emit(result);
     await result.promise;
+    this.onSpeaking.emit(undefined);
   }
 
   async handleMatchingInteractionFound(found: boolean): Promise<void> {

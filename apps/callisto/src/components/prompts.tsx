@@ -1,11 +1,10 @@
 import React, { MutableRefObject, useEffect, useRef, useState } from 'react';
 import { styled } from '@mui/material';
 
-import { CallistoService } from '@bitmetro/callisto';
 import { useInterval } from '../hooks/use-interval.hook';
 
 interface Props {
-  callisto: CallistoService;
+  prompts: string[];
   cycleDuration: number;
 }
 
@@ -13,12 +12,9 @@ const Prompt = styled('span')(() => ({
   opacity: 0
 }))
 
-export const Prompts: React.FC<Props> = ({ callisto, cycleDuration }) => {
+export const Prompts: React.FC<Props> = ({ prompts, cycleDuration }) => {
   const [promptIndex, setPromptIndex] = useState(0);
   const promptRef = useRef() as MutableRefObject<HTMLSpanElement>;
-
-  const contextChain = callisto.getContextChain();
-  const prompts = contextChain.map(ctx => ctx.getPrompts()).flat();
 
   useInterval(() => {
     const next = Math.floor(Math.random() * prompts.length);

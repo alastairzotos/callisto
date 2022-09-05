@@ -5,7 +5,7 @@ import { ask, stripInputOfExtraChars, CEventEmitter } from '../utils';
 import { CallistoPlugin, ForkProcess, ChildProcess, PluginImport, PluginImportSchema, PluginInteraction, sendAnswer, sendCommand } from '../plugin';
 import { InteractionHandlerResponse, InteractionResponse } from '../models';
 
-export class CallistoService {
+export class Callisto {
   public onProcessing = new CEventEmitter<(processing: boolean) => void>();
 
   private rootContext = new CallistoContext();

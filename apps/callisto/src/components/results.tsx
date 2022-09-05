@@ -4,7 +4,6 @@ import { SpeechInputAdapter } from '@bitmetro/callisto';
 
 interface Props {
   speechInputAdapter: SpeechInputAdapter;
-  error: boolean;
   responseText: string;
 }
 
@@ -16,7 +15,7 @@ const Response = styled(Typography)(() => ({
   fontFamily: 'monospace'
 }))
 
-export const Results: React.FC<Props> = ({ speechInputAdapter, error, responseText }) => {
+export const Results: React.FC<Props> = ({ speechInputAdapter, responseText }) => {
   const [interim, setInterim] = useState('');
   const [result, setResult] = useState('');
   const [response, setResponse] = useState(responseText);
@@ -42,7 +41,7 @@ export const Results: React.FC<Props> = ({ speechInputAdapter, error, responseTe
           : <Typography>{interim}</Typography>
       }
 
-      {error ? <Response>No match</Response> : response && <Response>{response}</Response>}
+      {response && <Response>{response}</Response>}
     </Wrapper>
   )
 }

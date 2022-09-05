@@ -1,19 +1,28 @@
-import fetch from 'node-fetch';
-import { question } from 'readline-sync';
+import * as chalk from 'chalk';
+import { CallistoClient } from '@bitmetro/callisto-client';
+import * as readline from 'readline';
 
-const start = async () => {
-  while (true) {
-    const input = question('> ');
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+})
 
-    const res = await fetch(`http://localhost:3001/query/${encodeURIComponent(input)}`);
-    const { error, responseText } = await res.json() as  { error: boolean, responseText: string };
+const question = (q: string) => new Promise<string>(resolve => rl.question(q, resolve))
 
-    if (error) {
-      console.log(`> [CALLISTO]: Sorry, I don't understand`)
-    } else {
-      console.log(`> [CALLISTO]: ${responseText}`);
-    }
-  }
-}
+const client = new CallistoClient({ retryTimeout: 3000 });
 
-start();
+const query = async () => client.sendTranscript(await question(`[${chalk.yellow('You')}]: `))
+
+client.onConnected.attach(() => {
+  console.log(chalk.green('Connected to Callisto server'));
+  query();
+})
+
+client.onMessage.attach(({ error, text }) => {
+  console.log(`[${chalk.blueBright('Callisto')}]: ${chalk.gray(text)}`);
+  query();
+})
+
+client.onClose.attach(() => console.log(chalk.red('Connection lost. Retrying...')));
+
+client.connect();

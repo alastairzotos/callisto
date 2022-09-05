@@ -16,8 +16,7 @@
     "@mui/material": "^5.10.3",
     "next": "12.2.5",
     "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "sentence-splitter": "^3.2.2"
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@types/node": "18.7.14",

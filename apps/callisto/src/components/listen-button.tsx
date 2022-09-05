@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Button, styled } from '@mui/material';
-import { CallistoService, SpeechInputAdapter } from '@bitmetro/callisto';
+import { SpeechInputAdapter, SpeechResult } from '@bitmetro/callisto';
 
 import { Prompts } from './prompts';
 
 interface Props {
-  callisto: CallistoService;
+  speechResult?: SpeechResult;
+  prompts: string[];
   speechInputAdapter: SpeechInputAdapter;
-  onCancel: () => void;
 }
 
 const StyledButton = styled(Button)(() => ({
@@ -16,31 +16,29 @@ const StyledButton = styled(Button)(() => ({
   width: '100%'
 }))
 
-export const ListenButton: React.FC<Props> = ({ callisto, speechInputAdapter, onCancel }) => {
+export const ListenButton: React.FC<Props> = ({ speechResult, prompts, speechInputAdapter }) => {
   const [listening, setListening] = useState(false);
-  const [enabled, setEnabled] = useState(true);
 
   useEffect(() => {
     speechInputAdapter.onListening.attach(setListening);
-    speechInputAdapter.onEnabled.attach(setEnabled);
   }, []);
 
   return (
     <StyledButton
       variant="contained"
-      color={enabled ? 'primary' : 'warning'}
+      color={!speechResult ? 'primary' : 'warning'}
       onMouseDown={() => speechInputAdapter.startRecognition()}
       onTouchStart={() => speechInputAdapter.startRecognition()}
       disabled={listening}
-      onClick={() => !enabled && onCancel()}
+      onClick={() => speechResult?.cancel()}
     >
       {
-        !enabled
+        !!speechResult
           ? 'Cancel'
           : (
             listening
               ? 'Listening'
-              : <Prompts callisto={callisto} cycleDuration={4000} />
+              : <Prompts prompts={prompts} cycleDuration={4000} />
           )
       }
     </StyledButton>

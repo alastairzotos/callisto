@@ -17,13 +17,9 @@ const importPlugin = (pluginFile: string) => {
   callisto.importPlugin(pluginFileContent, pluginPath, pluginFile.endsWith('.yaml') || pluginFile.endsWith('.yml') ? 'yaml' : 'json');
 }
 
-const plugins = [
-  path.resolve(pluginsRoot, 'wikipedia', 'wikipedia.plugin.yaml'),
-  path.resolve(pluginsRoot, 'jokes', 'jokes.plugin.yaml'),
-  path.resolve(pluginsRoot, 'weather', 'weather.plugin.yaml'),
-]
-
-plugins.forEach(importPlugin);
+fs.readdirSync(pluginsRoot)
+  .map(pluginName => path.resolve(pluginsRoot, pluginName, 'plugin.yaml'))
+  .forEach(importPlugin);
 
 callisto.registerOutputAdapter(new CliOutputAdapter());
 

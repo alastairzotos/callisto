@@ -1,16 +1,13 @@
-import { getCallistoArgs, sendCallistoResponse } from '@bitmetro/callisto-ipc';
+import { onReceiveArgs, sendResponse } from '@bitmetro/callisto-ipc';
 import { getSummary } from './get-summary';
 
-const start = async () => {
-  const { data: { topic, sentenceIndex } } = getCallistoArgs<{ topic?: string; sentenceIndex?: number }>();
-
+onReceiveArgs<{ topic?: string; sentenceIndex?: number }>(async (_, data) => {
+  const { topic, sentenceIndex } = data;
   const sentences = await getSummary(topic);
 
   if (sentenceIndex >= sentences.length - 1) {
-    return sendCallistoResponse(`That's all I have on ${topic}`, { topic, sentenceIndex });
+    return sendResponse(`That's all I have on ${topic}`, { topic, sentenceIndex });
   }
 
-  sendCallistoResponse(sentences[sentenceIndex], { topic, sentenceIndex: sentenceIndex + 1 });
-}
-
-start();
+  sendResponse(sentences[sentenceIndex], { topic, sentenceIndex: sentenceIndex + 1 });
+})

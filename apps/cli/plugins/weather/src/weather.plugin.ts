@@ -1,15 +1,12 @@
-import { getCallistoArgs, sendCallistoResponse } from '@bitmetro/callisto-ipc';
+import { onReceiveArgs, sendResponse, sendQuestion } from '@bitmetro/callisto-ipc';
 import { getWeather } from './get-weather';
 
-const start = async () => {
-  const { argv } = getCallistoArgs();
-  const [time = 'today', location] = argv;
-
+onReceiveArgs(async ([time = 'today', location]) => {
   if (!location) {
-    sendCallistoResponse('Where are you asking about?', { location: null });
+    return sendQuestion('Where do you live?', async answer => {
+      sendResponse(await getWeather(time, answer))
+    });
   }
 
-  sendCallistoResponse(await getWeather(time, location));
-}
-
-start();
+  sendResponse(await getWeather(time, location))
+})

@@ -8,7 +8,7 @@ import { CliInputAdapter, CliOutputAdapter } from './adapters';
 const pluginsRoot = path.resolve(__dirname, '..', 'plugins');
 
 const callisto = new CallistoService();
-callisto.setChildProcessHandler(forkProcess);
+callisto.setForkProcessHandler(forkProcess);
 
 const importPlugin = (pluginFile: string) => {
   const pluginPath = path.dirname(pluginFile);

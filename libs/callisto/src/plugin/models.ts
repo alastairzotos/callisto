@@ -28,6 +28,7 @@ export interface PluginInteraction {
 }
 
 export interface CallistoPluginResponse {
+  type: 'response' | 'question';
   response: string;
-  data: any;
+  data?: any;
 }

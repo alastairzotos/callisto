@@ -1,4 +1,3 @@
-import { CallistoPluginResponse } from '../plugin';
 import { CallistoService } from "../callisto/callisto";
 import { CallistoContext } from "../callisto/context";
 
@@ -50,4 +49,9 @@ export class CallistoOutputAdapter extends CallistoAdapter {
   async handleMatchingInteractionFound(found: boolean): Promise<void> {}
 }
 
-export type ChildProcessHandler = (cmd: string, args: string[], cwd: string) => Promise<CallistoPluginResponse>;
+export interface ChildProcess {
+  send: (message: string) => void;
+  on: (event: string, callback: (...args: any[]) => void) => ChildProcess;
+}
+
+export type ForkProcess = (cmd: string, args: string[], cwd: string) => ChildProcess;

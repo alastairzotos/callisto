@@ -1,9 +1,9 @@
 import { parse as parseYaml } from 'yaml';
 
 import { CallistoContext } from "./context";
-import { CallistoInputAdapter, CallistoOutputAdapter, ChildProcessHandler } from "../models/callisto.models";
-import { stripInputOfExtraChars } from '../utils';
-import { CallistoPlugin, PluginImport, PluginImportSchema, PluginInteraction } from '../plugin';
+import { CallistoInputAdapter, CallistoOutputAdapter, ForkProcess } from "../models/callisto.models";
+import { ask, stripInputOfExtraChars } from '../utils';
+import { CallistoPlugin, PluginImport, PluginImportSchema, PluginInteraction, sendMessage } from '../plugin';
 
 export interface CallistoEventHandlers {
   onHandlingInput?: (handlingInput: boolean) => void;
@@ -19,7 +19,7 @@ export class CallistoService {
 
   public pluginData: { [key: string]: any } = {};
 
-  private childProcessHandler?: ChildProcessHandler;
+  private forkProcess?: ForkProcess;
 
   applyPlugin(plugin: CallistoPlugin) {
     plugin(this.rootContext);
@@ -41,8 +41,8 @@ export class CallistoService {
     return chain;
   }
 
-  setChildProcessHandler(handler: ChildProcessHandler) {
-    this.childProcessHandler = handler;
+  setForkProcessHandler(handler: ForkProcess) {
+    this.forkProcess = handler;
   }
 
   importPlugin(configFileContent: string, basePath: string, format: 'json' | 'yaml') {
@@ -69,14 +69,22 @@ export class CallistoService {
   ) {
     interactions.forEach(({ inputs, resolve, children, goToParentContextOnceFinished }) => {
       ctx.addInteraction(inputs, async params => {
-        const encodedSubcontextData = Buffer.from(JSON.stringify(this.pluginData[id] || {})).toString('base64');
-
-        if (!this.childProcessHandler) {
+        if (!this.forkProcess) {
           return 'No child process handler set';
         }
 
         try {
-          const result = await this.childProcessHandler(resolve, [...params, encodedSubcontextData], basePath);
+          const pluginData = this.pluginData[id] || {};
+
+          const process = this.forkProcess(resolve, params, basePath);
+          const result = await sendMessage(process, JSON.stringify({ args: params, data: pluginData }));
+
+          if (result.type === 'question') {
+            return ask(ctx, result.response, async answer => {
+              const answerResult = await sendMessage(process, answer);
+              return answerResult.response!;
+            })
+          }
 
           this.pluginData[id] = result.data;
 

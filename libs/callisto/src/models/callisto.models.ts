@@ -1,3 +1,4 @@
+import { CallistoPluginResponse } from '../plugin';
 import { CallistoService } from "../callisto/callisto";
 import { CallistoContext } from "../callisto/context";
 
@@ -20,10 +21,8 @@ export interface InteractionHandlerResponse {
   matchingContext?: CallistoContext;
 }
 
-export type CallistoPlugin = (ctx: CallistoContext) => void;
-
 export class CallistoAdapter {
-  public callisto: CallistoService;
+  public callisto: CallistoService | undefined;
 
   register(callisto: CallistoService) {
     this.callisto = callisto;
@@ -32,7 +31,7 @@ export class CallistoAdapter {
 
 export class CallistoInputAdapter extends CallistoAdapter {
   async handleInput(input: string): Promise<void> {
-    await this.callisto.handleInput(input);
+    await this.callisto?.handleInput(input);
   }
 }
 
@@ -41,6 +40,8 @@ export class CallistoOutputAdapter extends CallistoAdapter {
     super();
   }
 
-  async handleResponse(response: InteractionResponse): Promise<void> {}
+  async handleResponse(response?: InteractionResponse): Promise<void> {}
   async handleMatchingInteractionFound(found: boolean): Promise<void> {}
 }
+
+export type ChildProcessHandler = (cmd: string, args: string[], cwd: string) => Promise<CallistoPluginResponse>;

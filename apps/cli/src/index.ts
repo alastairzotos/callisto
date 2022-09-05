@@ -1,41 +1,30 @@
-import { CallistoService, CallistoInputAdapter, CallistoOutputAdapter, InteractionResponse } from '@bitmetro/callisto';
+import { CallistoService } from '@bitmetro/callisto';
+import { forkProcess } from '@bitmetro/callisto-ipc';
+import * as path from 'path';
+import * as fs from 'fs';
+
 import { jokesPlugin } from './plugins/jokes.plugin';
 import { weatherPlugin } from './plugins/weather.plugin';
-import { wikipediaPlugin } from './plugins/wikipedia.plugin';
+import { CliInputAdapter, CliOutputAdapter } from './adapters';
 
-import { question } from 'readline-sync';
-
-class CliOutputAdapter extends CallistoOutputAdapter {
-  async handleMatchingInteractionFound(found: boolean) {
-    if (!found) {
-      console.log('[CALLISTO]:', this.noMatchResponse);
-    }
-  }
-
-  async handleResponse(response: InteractionResponse): Promise<void> {
-    console.log('[CALLISTO]:', response.responseText);
-  }
-}
-
-class CliInputAdapter extends CallistoInputAdapter {
-  async start() {
-    while (true) {
-      await this.handleInput(question('> '))
-    }
-  }
-}
+const pluginsRoot = path.resolve(__dirname, '..', '..', '..', 'plugins');
 
 const callisto = new CallistoService();
-callisto.applyPlugins(weatherPlugin, wikipediaPlugin, jokesPlugin);
+callisto.setChildProcessHandler(forkProcess);
+
+const importPlugin = (pluginFile: string) => {
+  const pluginPath = path.dirname(pluginFile);
+  const pluginFileContent = fs.readFileSync(pluginFile).toString();
+
+  callisto.importPlugin(pluginFileContent, pluginPath, pluginFile.endsWith('.yaml') || pluginFile.endsWith('.yml') ? 'yaml' : 'json');
+}
+
+callisto.applyPlugins(weatherPlugin, jokesPlugin);
+importPlugin(path.resolve(pluginsRoot, 'wikipedia', 'wikipedia.plugin.yaml'))
 
 callisto.registerOutputAdapter(new CliOutputAdapter());
 
 const inputAdapter = new CliInputAdapter();
 callisto.registerInputAdapter(inputAdapter);
 
-/*
-  Uncomment the line below to start
-  Run "yarn dev" in the cli project folder
-*/
-
-// inputAdapter.start();
+inputAdapter.start();

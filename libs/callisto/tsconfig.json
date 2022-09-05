@@ -3,6 +3,7 @@
 		"src"
 	],
 	"compilerOptions": {
+		"strict": true,
     "moduleResolution": "node",
 		"target": "es5",
 		"noImplicitAny": false,

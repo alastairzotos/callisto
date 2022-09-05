@@ -1,7 +1,9 @@
+import { parse as parseYaml } from 'yaml';
+
 import { CallistoContext } from "./context";
-import { CallistoInputAdapter, CallistoOutputAdapter, InteractionResponse } from "../models/callisto.models";
-import { CallistoPlugin } from "../models";
+import { CallistoInputAdapter, CallistoOutputAdapter, ChildProcessHandler } from "../models/callisto.models";
 import { stripInputOfExtraChars } from '../utils';
+import { CallistoPlugin, PluginImport, PluginImportSchema, PluginInteraction } from '../plugin';
 
 export interface CallistoEventHandlers {
   onHandlingInput?: (handlingInput: boolean) => void;
@@ -10,10 +12,14 @@ export interface CallistoEventHandlers {
 export class CallistoService {
   private rootContext = new CallistoContext();
   private currentContext?: CallistoContext = this.rootContext;
-  
+
   private onHandlingInputListeners: Array<(handlingInput: boolean) => void> = [];
   private inputAdapters: CallistoInputAdapter[] = [];
   private outputAdapters: CallistoOutputAdapter[] = [];
+
+  public pluginData: { [key: string]: any } = {};
+
+  private childProcessHandler?: ChildProcessHandler;
 
   applyPlugin(plugin: CallistoPlugin) {
     plugin(this.rootContext);
@@ -33,6 +39,64 @@ export class CallistoService {
     }
 
     return chain;
+  }
+
+  setChildProcessHandler(handler: ChildProcessHandler) {
+    this.childProcessHandler = handler;
+  }
+
+  importPlugin(configFileContent: string, basePath: string, format: 'json' | 'yaml') {
+    let config: PluginImport =
+      format === 'yaml'
+        ? parseYaml(configFileContent)
+        : JSON.parse(configFileContent);
+
+    this.applyPlugin(ctx => {
+      try {
+        config = PluginImportSchema.parse(config) as PluginImport;
+        this.addPluginInteractions(config.id, ctx, config.interactions, basePath);
+      } catch (e) {
+        console.error(e)
+      }
+    });
+  }
+
+  private addPluginInteractions(
+    id: string,
+    ctx: CallistoContext,
+    interactions: PluginInteraction[],
+    basePath: string,
+  ) {
+    interactions.forEach(({ inputs, resolve, children, goToParentContextOnceFinished }) => {
+      ctx.addInteraction(inputs, async params => {
+        const encodedSubcontextData = Buffer.from(JSON.stringify(this.pluginData[id] || {})).toString('base64');
+
+        if (!this.childProcessHandler) {
+          return 'No child process handler set';
+        }
+
+        try {
+          const result = await this.childProcessHandler(resolve, [...params, encodedSubcontextData], basePath);
+
+          this.pluginData[id] = result.data;
+
+          if (!children || children.length === 0) {
+            return result.response;
+          }
+
+          const subContext = new CallistoContext(ctx);
+          this.addPluginInteractions(id, subContext, children, basePath);
+
+          return {
+            responseText: result.response,
+            goToParentContextOnceFinished,
+            context: subContext
+          }
+        } catch {
+          return 'There was an error handling your request'
+        }
+      })
+    })
   }
 
   onHandlingInput(listener: (handlingInput: boolean) => void) {
@@ -66,7 +130,7 @@ export class CallistoService {
 
       this.currentContext = response.matchingContext;
 
-      if (response.interactionResponse.goToParentContextOnceFinished) {
+      if (response.interactionResponse?.goToParentContextOnceFinished) {
         this.currentContext = this.currentContext?.parent;
       }
     }

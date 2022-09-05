@@ -1,0 +1,15 @@
+{
+  "id": "wikipedia",
+  "interactions": [
+    {
+      "inputs": ["tell me about (.+)"],
+      "resolve": "./src/wikipedia.plugin.main.ts",
+      "children": [
+        {
+          "inputs": ["continue"],
+          "resolve": "./src/wikipedia.plugin.continue.ts"
+        }
+      ]
+    }
+  ]
+}

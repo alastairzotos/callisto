@@ -2,8 +2,7 @@ import { CallistoService } from '@bitmetro/callisto';
 import { forkProcess } from '@bitmetro/callisto-ipc';
 import * as path from 'path';
 import * as fs from 'fs';
-
-import { CliInputAdapter, CliOutputAdapter } from './adapters';
+import { question } from 'readline-sync';
 
 const pluginsRoot = path.resolve(__dirname, '..', 'plugins');
 
@@ -21,9 +20,21 @@ fs.readdirSync(pluginsRoot)
   .map(pluginName => path.resolve(pluginsRoot, pluginName, 'plugin.yaml'))
   .forEach(importPlugin);
 
-callisto.registerOutputAdapter(new CliOutputAdapter());
 
-const inputAdapter = new CliInputAdapter();
-callisto.registerInputAdapter(inputAdapter);
+callisto.addEventHandlers({
+  onResponse: async ({ error, interactionResponse }) => {
+    if (error) {
+      console.log(`> [CALLISTO]: Sorry, I don't understand`)
+    } else if (interactionResponse) {
+      console.log(`> [CALLISTO]: ${interactionResponse.responseText}`);
+    }
+  }
+})
 
-inputAdapter.start();
+const start = async () => {
+  while (true) {
+    await callisto.handleInput(question('> '))
+  }
+}
+
+start();

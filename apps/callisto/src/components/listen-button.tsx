@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Button, styled } from '@mui/material';
-import { SpeechInputAdapter } from '@bitmetro/callisto';
+import { CallistoService, SpeechInputAdapter } from '@bitmetro/callisto';
 
 import { Prompts } from './prompts';
 
 interface Props {
+  callisto: CallistoService;
   speechInputAdapter: SpeechInputAdapter;
   onCancel: () => void;
 }
@@ -15,7 +16,7 @@ const StyledButton = styled(Button)(() => ({
   width: '100%'
 }))
 
-export const ListenButton: React.FC<Props> = ({ speechInputAdapter, onCancel }) => {
+export const ListenButton: React.FC<Props> = ({ callisto, speechInputAdapter, onCancel }) => {
   const [listening, setListening] = useState(false);
   const [enabled, setEnabled] = useState(true);
 
@@ -41,7 +42,7 @@ export const ListenButton: React.FC<Props> = ({ speechInputAdapter, onCancel }) 
           : (
             listening
               ? 'Listening'
-              : <Prompts callisto={speechInputAdapter.callisto} cycleDuration={4000} />
+              : <Prompts callisto={callisto} cycleDuration={4000} />
           )
       }
     </StyledButton>

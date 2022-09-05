@@ -1,22 +1,20 @@
-import { CallistoOutputAdapter, InteractionResponse } from "../../models/callisto.models";
+import { InteractionResponse } from '../models/callisto.models';
 
 export interface SpeechResult {
   promise: Promise<SpeechSynthesisEvent>;
   cancel: () => void;
 }
 
-export class SpeechOutputAdapter extends CallistoOutputAdapter {
+export class SpeechOutputAdapter {
   private onSpeakingListeners: Array<(response: SpeechResult) => void> = [];
 
-  constructor(noMatchResponse: string = "Sorry, I don't understand") {
-    super(noMatchResponse);
-  }
+  constructor(private readonly noMatchResponse: string = "Sorry, I don't understand") {}
 
   onSpeaking(listener: (response: SpeechResult) => void) {
     this.onSpeakingListeners.push(listener);
   }
 
-  async handleResponse(response: InteractionResponse): Promise<void> {
+  async speakResponse(response: InteractionResponse): Promise<void> {
     const result = this.speak(response.responseText);
     this.onSpeakingListeners.map(listener => listener(result));
     await result.promise;

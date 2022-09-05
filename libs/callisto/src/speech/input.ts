@@ -1,5 +1,3 @@
-import { CallistoInputAdapter } from "../../models/callisto.models";
-
 export interface WebkitSpeechRecognitionResultEvent {
   results: WebkitSpeechRecognitionResult[];
   resultIndex: number;
@@ -28,19 +26,17 @@ export interface IWindow extends Window {
 
 export interface SpeechInputEventHandlers {
   onInterim?: (transcript: string) => void;
-  onResult?: (transcript: string) => void;
+  onResult?: (transcript: string) => Promise<void>;
   onListening?: (listening: boolean) => void;
   onEnabled?: (enabled: boolean) => void;
 }
 
-export class SpeechInputAdapter extends CallistoInputAdapter {
+export class SpeechInputAdapter {
   private recognition?: WebkitSpeechRecognition;
   private eventHandlers: SpeechInputEventHandlers[] = [];
   private recognitionEnabled: boolean = true;
 
   constructor() {
-    super();
-
     if (typeof window !== undefined && 'webkitSpeechRecognition' in window) {
       const { webkitSpeechRecognition } = window as unknown as IWindow;
 
@@ -57,7 +53,7 @@ export class SpeechInputAdapter extends CallistoInputAdapter {
           const transcript = result[0].transcript.trim().toLocaleLowerCase();
 
           if (result.isFinal) {
-            this.handleInput(transcript);
+            this.handleResult(transcript);
           } else {
             this.eventHandlers.map(handler => handler.onInterim?.(transcript));
           }
@@ -66,26 +62,12 @@ export class SpeechInputAdapter extends CallistoInputAdapter {
     }
   }
 
-  async handleInput(transcript: string) {
-    this.recognition?.abort();
-    this.setRecognitionEnabled(false);
-    this.eventHandlers.map(handler => handler.onListening?.(false));
-    this.eventHandlers.map(handler => handler.onResult?.(transcript));
-
-    if (this.callisto) {
-      await this.resultHandler?.(transcript);
-    }
-
-    this.setRecognitionEnabled(true);
-  }
-
   startRecognition() {
     if (this.recognitionEnabled) {
       try {
         this.recognition?.abort();
         this.recognition?.start();
         this.eventHandlers.map(handler => handler.onInterim?.(''));
-        this.eventHandlers.map(handler => handler.onResult?.(''));
         this.eventHandlers.map(handler => handler.onListening?.(true));
       } catch {
         this.recognition?.abort();
@@ -96,6 +78,14 @@ export class SpeechInputAdapter extends CallistoInputAdapter {
 
   addEventHandlers(handlers: SpeechInputEventHandlers) {
     this.eventHandlers.push(handlers);
+  }
+
+  private async handleResult(transcript: string) {
+    this.recognition?.abort();
+    this.setRecognitionEnabled(false);
+    this.eventHandlers.map(handler => handler.onListening?.(false));
+    await Promise.all(this.eventHandlers.map(handler => handler.onResult?.(transcript)))
+    this.setRecognitionEnabled(true);
   }
 
   private setRecognitionEnabled(enabled: boolean) {

@@ -1,21 +1,20 @@
 import { parse as parseYaml } from 'yaml';
 
 import { CallistoContext } from "./context";
-import { CallistoInputAdapter, CallistoOutputAdapter } from "../models/callisto.models";
 import { ask, stripInputOfExtraChars } from '../utils';
 import { CallistoPlugin, ForkProcess, ChildProcess, PluginImport, PluginImportSchema, PluginInteraction, sendAnswer, sendCommand } from '../plugin';
+import { InteractionHandlerResponse } from '../models';
 
 export interface CallistoEventHandlers {
   onHandlingInput?: (handlingInput: boolean) => void;
+  onResponse?: (response: InteractionHandlerResponse) => Promise<void>;
 }
 
 export class CallistoService {
   private rootContext = new CallistoContext();
   private currentContext?: CallistoContext = this.rootContext;
 
-  private onHandlingInputListeners: Array<(handlingInput: boolean) => void> = [];
-  private inputAdapters: CallistoInputAdapter[] = [];
-  private outputAdapters: CallistoOutputAdapter[] = [];
+  private eventHandlers: CallistoEventHandlers[] = [];
 
   private forkProcess?: ForkProcess;
 
@@ -103,22 +102,12 @@ export class CallistoService {
     })
   }
 
-  onHandlingInput(listener: (handlingInput: boolean) => void) {
-    this.onHandlingInputListeners.push(listener);
-  }
-
-  registerInputAdapter(adapter: CallistoInputAdapter) {
-    this.inputAdapters.push(adapter);
-    adapter.register(this);
-  }
-
-  registerOutputAdapter(adapter: CallistoOutputAdapter) {
-    this.outputAdapters.push(adapter);
-    adapter.register(this);
+  addEventHandlers(handlers: CallistoEventHandlers) {
+    this.eventHandlers.push(handlers);
   }
 
   async handleInput(input: string) {
-    this.onHandlingInputListeners.map(handler => handler(true));
+    this.eventHandlers.map(handler => handler.onHandlingInput?.(true));
 
     if (!this.currentContext) {
       this.currentContext = this.rootContext;
@@ -127,10 +116,9 @@ export class CallistoService {
     const response = await this.currentContext.handleInput(stripInputOfExtraChars(input));
 
     if (response.error) {
-      await Promise.all(this.outputAdapters.map(adapter => adapter.handleMatchingInteractionFound(false)));
+      await Promise.all(this.eventHandlers.map(handler => handler.onResponse?.({ error: true })));
     } else {
-      await Promise.all(this.outputAdapters.map(adapter => adapter.handleMatchingInteractionFound(true)));
-      await Promise.all(this.outputAdapters.map(adapter => adapter.handleResponse(response.interactionResponse)));
+      await Promise.all(this.eventHandlers.map(handler => handler.onResponse?.({ error: false, interactionResponse: response.interactionResponse })));
 
       this.currentContext = response.matchingContext;
 
@@ -139,6 +127,6 @@ export class CallistoService {
       }
     }
 
-    this.onHandlingInputListeners.map(handler => handler(false));
+    this.eventHandlers.map(handler => handler.onHandlingInput?.(true));
   }
 }

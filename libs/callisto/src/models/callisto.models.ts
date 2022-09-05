@@ -27,25 +27,3 @@ export class CallistoAdapter {
     this.callisto = callisto;
   }
 }
-
-export class CallistoInputAdapter extends CallistoAdapter {
-  protected resultHandler: (input: string) => Promise<void> = async input => await this.callisto?.handleInput(input);
-
-  setResultHandler(handler: (input: string) => Promise<void>) {
-    this.resultHandler = handler;
-  }
-
-  async handleInput(input: string): Promise<void> {
-    await this.resultHandler?.(input);
-  }
-}
-
-export class CallistoOutputAdapter extends CallistoAdapter {
-  constructor(public readonly noMatchResponse = "Sorry, I don't understand.") {
-    super();
-  }
-
-  async handleResponse(response?: InteractionResponse): Promise<void> {}
-  async handleMatchingInteractionFound(found: boolean): Promise<void> {}
-}
-

@@ -18,6 +18,8 @@ const darkTheme = createTheme({
   }
 });
 
+const callisto = new CallistoService();
+
 const App: React.FC = () => {
   const [speechResponse, setSpeechResponse] = useState<SpeechResult | null>(null);
   const [speechInputAdapter, setSpeechInputAdapter] = useState<SpeechInputAdapter | null>(null);
@@ -25,15 +27,25 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (typeof window !== undefined) {
-      const callisto = new CallistoService();
       callisto.applyPlugins(weatherPlugin, wikipediaPlugin, jokesPlugin)
 
-      const inputAdapter = new SpeechInputAdapter()
-      callisto.registerInputAdapter(inputAdapter);
+      const inputAdapter = new SpeechInputAdapter();
+      inputAdapter.addEventHandlers({
+        onResult: transcript => callisto.handleInput(transcript)
+      })
 
       const outputAdapter = new SpeechOutputAdapter();
-      callisto.registerOutputAdapter(outputAdapter);
       outputAdapter.onSpeaking(setSpeechResponse);
+      
+      callisto.addEventHandlers({
+        onResponse: async ({ error, interactionResponse }) => {
+          if (error) {
+            await outputAdapter.handleMatchingInteractionFound(false);
+          } else {
+            await outputAdapter.speakResponse(interactionResponse!);
+          }
+        }
+      })
 
       setSpeechInputAdapter(inputAdapter);
       setSpeechOutputAdapter(outputAdapter);
@@ -55,10 +67,14 @@ const App: React.FC = () => {
           <Container maxWidth="sm">
             <div style={{ height: 'calc(100vh - 180px)', padding: 20 }}>
               <Logo />
-              <Results speechInputAdapter={speechInputAdapter} />
+              <Results callisto={callisto} speechInputAdapter={speechInputAdapter} />
             </div>
 
-            <ListenButton speechInputAdapter={speechInputAdapter} onCancel={() => speechResponse?.cancel()} />
+            <ListenButton
+              callisto={callisto}
+              speechInputAdapter={speechInputAdapter}
+              onCancel={() => speechResponse?.cancel()}
+            />
           </Container>
         )}
       </ThemeProvider>

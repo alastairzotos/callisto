@@ -1,20 +1,16 @@
 import { parse as parseYaml } from 'yaml';
 
 import { CallistoContext } from "./context";
-import { ask, stripInputOfExtraChars } from '../utils';
+import { ask, stripInputOfExtraChars, CEventEmitter } from '../utils';
 import { CallistoPlugin, ForkProcess, ChildProcess, PluginImport, PluginImportSchema, PluginInteraction, sendAnswer, sendCommand } from '../plugin';
 import { InteractionHandlerResponse } from '../models';
 
-export interface CallistoEventHandlers {
-  onHandlingInput?: (handlingInput: boolean) => void;
-  onResponse?: (response: InteractionHandlerResponse) => Promise<void>;
-}
-
 export class CallistoService {
+  public onProcessing = new CEventEmitter<(processing: boolean) => void>();
+  public onResponse = new CEventEmitter<(response: InteractionHandlerResponse) => Promise<void>>();
+
   private rootContext = new CallistoContext();
   private currentContext?: CallistoContext = this.rootContext;
-
-  private eventHandlers: CallistoEventHandlers[] = [];
 
   private forkProcess?: ForkProcess;
 
@@ -102,12 +98,8 @@ export class CallistoService {
     })
   }
 
-  addEventHandlers(handlers: CallistoEventHandlers) {
-    this.eventHandlers.push(handlers);
-  }
-
   async handleInput(input: string) {
-    this.eventHandlers.map(handler => handler.onHandlingInput?.(true));
+    this.onProcessing.emit(true);
 
     if (!this.currentContext) {
       this.currentContext = this.rootContext;
@@ -116,9 +108,9 @@ export class CallistoService {
     const response = await this.currentContext.handleInput(stripInputOfExtraChars(input));
 
     if (response.error) {
-      await Promise.all(this.eventHandlers.map(handler => handler.onResponse?.({ error: true })));
+      await this.onResponse.emit({ error: true });
     } else {
-      await Promise.all(this.eventHandlers.map(handler => handler.onResponse?.({ error: false, interactionResponse: response.interactionResponse })));
+      await this.onResponse.emit({ error: false, interactionResponse: response.interactionResponse })
 
       this.currentContext = response.matchingContext;
 
@@ -127,6 +119,6 @@ export class CallistoService {
       }
     }
 
-    this.eventHandlers.map(handler => handler.onHandlingInput?.(true));
+    this.onProcessing.emit(false);
   }
 }

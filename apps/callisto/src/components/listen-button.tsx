@@ -21,10 +21,8 @@ export const ListenButton: React.FC<Props> = ({ callisto, speechInputAdapter, on
   const [enabled, setEnabled] = useState(true);
 
   useEffect(() => {
-    speechInputAdapter.addEventHandlers({
-      onListening: setListening,
-      onEnabled: setEnabled,
-    })
+    speechInputAdapter.onListening.attach(setListening);
+    speechInputAdapter.onEnabled.attach(setEnabled);
   }, []);
 
   return (

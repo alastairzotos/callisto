@@ -22,26 +22,22 @@ export const Results: React.FC<Props> = ({ callisto, speechInputAdapter }) => {
   const [response, setResponse] = useState('');
 
   useEffect(() => {
-    callisto.addEventHandlers({
-      onResponse: async ({ error, interactionResponse }) => {
-        if (error) {
-          setMatchFound(false);
-        } else {
-          setMatchFound(true);
-          setResponse(interactionResponse?.responseText!);
-        }
+    callisto.onResponse.attach(async ({ error, interactionResponse }) => {
+      if (error) {
+        setMatchFound(false);
+      } else {
+        setMatchFound(true);
+        setResponse(interactionResponse?.responseText!);
       }
     })
 
-    speechInputAdapter.addEventHandlers({
-      onInterim: setInterim,
-      onResult: setResult,
-      onListening: listening => {
-        if (listening) {
-          setResult('');
-        }
-        setResponse('')
+    speechInputAdapter.onInterim.attach(setInterim);
+    speechInputAdapter.onResult.attach(async result => setResult(result));
+    speechInputAdapter.onListening.attach(listening => {
+      if (listening) {
+        setResult('');
       }
+      setResponse('')
     })
   }, []);
 

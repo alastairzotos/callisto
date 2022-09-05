@@ -20,14 +20,11 @@ fs.readdirSync(pluginsRoot)
   .map(pluginName => path.resolve(pluginsRoot, pluginName, 'plugin.yaml'))
   .forEach(importPlugin);
 
-
-callisto.addEventHandlers({
-  onResponse: async ({ error, interactionResponse }) => {
-    if (error) {
-      console.log(`> [CALLISTO]: Sorry, I don't understand`)
-    } else if (interactionResponse) {
-      console.log(`> [CALLISTO]: ${interactionResponse.responseText}`);
-    }
+callisto.onResponse.attach(async ({ error, interactionResponse }) => {
+  if (error) {
+    console.log(`> [CALLISTO]: Sorry, I don't understand`)
+  } else if (interactionResponse) {
+    console.log(`> [CALLISTO]: ${interactionResponse.responseText}`);
   }
 })
 

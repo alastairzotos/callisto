@@ -30,20 +30,16 @@ const App: React.FC = () => {
       callisto.applyPlugins(weatherPlugin, wikipediaPlugin, jokesPlugin)
 
       const inputAdapter = new SpeechInputAdapter();
-      inputAdapter.addEventHandlers({
-        onResult: transcript => callisto.handleInput(transcript)
-      })
+      inputAdapter.onResult.attach(transcript => callisto.handleInput(transcript));
 
       const outputAdapter = new SpeechOutputAdapter();
       outputAdapter.onSpeaking(setSpeechResponse);
-      
-      callisto.addEventHandlers({
-        onResponse: async ({ error, interactionResponse }) => {
-          if (error) {
-            await outputAdapter.handleMatchingInteractionFound(false);
-          } else {
-            await outputAdapter.speakResponse(interactionResponse!);
-          }
+
+      callisto.onResponse.attach( async ({ error, interactionResponse }) => {
+        if (error) {
+          await outputAdapter.handleMatchingInteractionFound(false);
+        } else {
+          await outputAdapter.speakResponse(interactionResponse!);
         }
       })
 

@@ -1,3 +1,5 @@
+import { CEventEmitter } from '../utils';
+
 export interface WebkitSpeechRecognitionResultEvent {
   results: WebkitSpeechRecognitionResult[];
   resultIndex: number;
@@ -32,8 +34,12 @@ export interface SpeechInputEventHandlers {
 }
 
 export class SpeechInputAdapter {
+  public onInterim = new CEventEmitter<(transcript: string) => void>();
+  public onResult = new CEventEmitter<(transcript: string) => Promise<void>>();
+  public onListening = new CEventEmitter<(listening: boolean) => void>();
+  public onEnabled = new CEventEmitter<(enabled: boolean) => void>();
+
   private recognition?: WebkitSpeechRecognition;
-  private eventHandlers: SpeechInputEventHandlers[] = [];
   private recognitionEnabled: boolean = true;
 
   constructor() {
@@ -55,7 +61,7 @@ export class SpeechInputAdapter {
           if (result.isFinal) {
             this.handleResult(transcript);
           } else {
-            this.eventHandlers.map(handler => handler.onInterim?.(transcript));
+            this.onInterim.emit(transcript);
           }
         };
       }
@@ -67,29 +73,25 @@ export class SpeechInputAdapter {
       try {
         this.recognition?.abort();
         this.recognition?.start();
-        this.eventHandlers.map(handler => handler.onInterim?.(''));
-        this.eventHandlers.map(handler => handler.onListening?.(true));
+        this.onInterim.emit('');
+        this.onListening.emit(true);
       } catch {
         this.recognition?.abort();
-        this.eventHandlers.map(handler => handler.onListening?.(false));
+        this.onListening.emit(false);
       }
     }
-  }
-
-  addEventHandlers(handlers: SpeechInputEventHandlers) {
-    this.eventHandlers.push(handlers);
   }
 
   private async handleResult(transcript: string) {
     this.recognition?.abort();
     this.setRecognitionEnabled(false);
-    this.eventHandlers.map(handler => handler.onListening?.(false));
-    await Promise.all(this.eventHandlers.map(handler => handler.onResult?.(transcript)))
+    this.onListening.emit(false);
+    await this.onResult.emit(transcript);
     this.setRecognitionEnabled(true);
   }
 
   private setRecognitionEnabled(enabled: boolean) {
     this.recognitionEnabled = enabled;
-    this.eventHandlers.map(handler => handler.onEnabled?.(enabled));
+    this.onEnabled.emit(enabled);
   }
 }

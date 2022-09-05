@@ -47,6 +47,7 @@ const App: React.FC = () => {
         <meta name="description" content="A simple virtual assistant framework for TypeScript" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
 

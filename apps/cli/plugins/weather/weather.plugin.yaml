@@ -1,0 +1,9 @@
+id: jokes
+interactions:
+  - resolve: ./src/weather.plugin.ts
+    inputs: 
+      - what's the weather like( today| tomorrow)? in (.+)
+  
+  - resolve: ./src/weather.plugin.ts
+    inputs:
+      - what's the weather like( today| tomorrow)?

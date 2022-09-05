@@ -1,9 +1,6 @@
 {
-	"include": [
-		"src"
-, "plugins/weather/src/env.ts", "plugins"	],
+	"include": ["src"],
 	"compilerOptions": {
-		"strict": true,
 		"lib": ["ES2015", "DOM"],
     "moduleResolution": "node",
 		"target": "es5",

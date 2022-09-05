@@ -3,7 +3,7 @@ import { CallistoPluginResponse, ChildProcessHandler } from '@bitmetro/callisto'
 
 export interface CallistoPluginArgs<T> {
   data?: T;
-  argv: string[];
+  argv: (string | undefined)[];
 }
 
 export const getCallistoArgs = <T = any>(): CallistoPluginArgs<T> => {
@@ -12,7 +12,7 @@ export const getCallistoArgs = <T = any>(): CallistoPluginArgs<T> => {
 
   return {
     data: JSON.parse(Buffer.from(contextDataArg || '{}', 'base64').toString()) as T,
-    argv
+    argv: argv.map(argv => argv === 'undefined' ? undefined : argv)
   }
 }
 

@@ -1,33 +1,42 @@
 import { fork } from 'child_process';
-import { CallistoPluginResponse, ForkProcess } from '@bitmetro/callisto';
+import { CallistoPluginMessage, CallistoPluginResponse, ForkProcess } from '@bitmetro/callisto';
 
-export interface CallistoPluginInput<T> {
-  type: 'cmd' | 'answer';
-  data?: T;
-  args: (string | undefined)[];
+let answerCallback: ((answer: string) => void | undefined);
+
+type InteractionHandler = (args: (string | undefined)[]) => string | Promise<string>;
+const interactionHandlers: { [id: string]: InteractionHandler } = {};
+
+let pluginStarted = false;
+const startPlugin = () => {
+  if (!pluginStarted) {
+    pluginStarted = true;
+
+    process.on('message', async (message: string) => {
+      const data = JSON.parse(message) as CallistoPluginMessage;
+      if (data.type === 'cmd') {
+        const { interactionId, args } = data;
+        const response = interactionHandlers[interactionId!]?.(args!.map(arg => arg === null ? undefined : arg))
+        sendResponse(typeof response === 'string' ? response : await response);
+      } else if (data.type === 'answer') {
+        answerCallback(data.answer!);
+      }
+    })
+  }
 }
 
-let currentCallback: ((message: string) => void | undefined);
-
-export const onReceiveArgs = <T = any>(cb: (args: (string | undefined)[], data?: T) => void) => {
-  const handler = message => currentCallback?.(message);
-
-  currentCallback = (message: string) => {
-    const { args, data } = JSON.parse(message) as CallistoPluginInput<T>
-    cb(args.map(arg => arg === null ? undefined : arg), data)
-  };
-
-  process.on('message', handler)
+export const onInteraction = (id: string, cb: InteractionHandler) => {
+  startPlugin();
+  interactionHandlers[id] = cb;
 }
 
 export const sendQuestion = (question: string, cb: (answer: string) => void) => {
-  currentCallback = cb;
+  answerCallback = cb;
   process.send?.({ type: 'question', response: question } as CallistoPluginResponse);
 }
 
-export const sendResponse = (response: string, data: any = {}) => {
-  process.send?.({ type: 'response', response, data } as CallistoPluginResponse);
+export const sendResponse = (response: string) => {
+  process.send?.({ type: 'response', response } as CallistoPluginResponse);
 }
 
-export const forkProcess: ForkProcess = (cmd: string, args: string[], cwd: string) => fork(cmd, args, { cwd })
+export const forkProcess: ForkProcess = (cmd: string, cwd: string) => fork(cmd, { cwd })
 

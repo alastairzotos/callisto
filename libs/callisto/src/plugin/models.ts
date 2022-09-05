@@ -4,25 +4,25 @@ import { CallistoContext } from '../callisto';
 export type CallistoPlugin = (ctx: CallistoContext) => void;
 
 export const PluginInteractionSchema: z.ZodType<PluginInteraction> = z.lazy(() => z.object({
+  id: z.string(),
   inputs: z.array(z.string()),
-  resolve: z.string(),
   goToParentContextOnceFinished: z.optional(z.boolean()),
   children: z.optional(z.array(PluginInteractionSchema))
 }))
 
 export const PluginImportSchema: z.ZodType<PluginImport> = z.object({
-  id: z.string(),
+  resolve: z.string(),
   interactions: z.array(PluginInteractionSchema)
 })
 
 export interface PluginImport {
-  id: string;
+  resolve: string;
   interactions: PluginInteraction[];
 }
 
 export interface PluginInteraction {
+  id: string;
   inputs: string[];
-  resolve: string;
   children?: PluginInteraction[];
   goToParentContextOnceFinished?: boolean;
 }
@@ -30,5 +30,11 @@ export interface PluginInteraction {
 export interface CallistoPluginResponse {
   type: 'response' | 'question';
   response: string;
-  data?: any;
+}
+
+export interface CallistoPluginMessage {
+  type: 'cmd' | 'answer';
+  interactionId?: string;
+  args?: (string | undefined)[];
+  answer?: string;
 }

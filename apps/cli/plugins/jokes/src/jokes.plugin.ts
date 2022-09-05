@@ -1,4 +1,4 @@
-import { onReceiveArgs, sendResponse } from '@bitmetro/callisto-ipc';
+import { onInteraction } from '@bitmetro/callisto-ipc';
 import fetch from 'node-fetch';
 
 export const getJoke = async (): Promise<string> => {
@@ -17,5 +17,5 @@ export const getJoke = async (): Promise<string> => {
   }
 }
 
-
-onReceiveArgs(async () => sendResponse(await getJoke()));
+onInteraction('joke', getJoke);
+onInteraction('continue', getJoke);

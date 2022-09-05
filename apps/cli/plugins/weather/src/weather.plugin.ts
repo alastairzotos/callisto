@@ -1,12 +1,8 @@
-import { onReceiveArgs, sendResponse, sendQuestion } from '@bitmetro/callisto-ipc';
+import { onInteraction, sendQuestion } from '@bitmetro/callisto-ipc';
 import { getWeather } from './get-weather';
 
-onReceiveArgs(async ([time = 'today', location]) => {
-  if (!location) {
-    return sendQuestion('Where do you live?', async answer => {
-      sendResponse(await getWeather(time, answer))
-    });
-  }
+onInteraction('with-location', async ([time = 'today', location]) => await getWeather(time, location))
 
-  sendResponse(await getWeather(time, location))
-})
+onInteraction('no-location', ([time = 'today']) => new Promise<string>((resolve) => {
+  sendQuestion('Where do you live?', async location => resolve(await getWeather(time, location)))
+}))

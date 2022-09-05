@@ -1,9 +1,9 @@
-id: jokes
+resolve: ./src/weather.plugin.ts
 interactions:
-  - resolve: ./src/weather.plugin.ts
+  - id: with-location
     inputs: 
       - what's the weather like( today| tomorrow)? in (.+)
   
-  - resolve: ./src/weather.plugin.ts
+  - id: no-location
     inputs:
       - what's the weather like( today| tomorrow)?

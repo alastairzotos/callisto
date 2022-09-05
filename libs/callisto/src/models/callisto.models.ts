@@ -49,9 +49,3 @@ export class CallistoOutputAdapter extends CallistoAdapter {
   async handleMatchingInteractionFound(found: boolean): Promise<void> {}
 }
 
-export interface ChildProcess {
-  send: (message: string) => void;
-  on: (event: string, callback: (...args: any[]) => void) => ChildProcess;
-}
-
-export type ForkProcess = (cmd: string, args: string[], cwd: string) => ChildProcess;

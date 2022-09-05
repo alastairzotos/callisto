@@ -1,11 +1,12 @@
-id: jokes
+resolve: ./src/jokes.plugin.ts
 interactions:
-  - resolve: ./src/jokes.plugin.ts
+  - id: joke
     inputs: 
       - tell me a joke
     children:
-      - resolve: ./src/jokes.plugin.ts
+      - id: continue
         inputs:
+          - continue
           - tell me another one
           - and another one
           - and another

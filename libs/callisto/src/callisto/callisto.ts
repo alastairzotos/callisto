@@ -1,9 +1,9 @@
 import { parse as parseYaml } from 'yaml';
 
 import { CallistoContext } from "./context";
-import { CallistoInputAdapter, CallistoOutputAdapter, ForkProcess } from "../models/callisto.models";
+import { CallistoInputAdapter, CallistoOutputAdapter } from "../models/callisto.models";
 import { ask, stripInputOfExtraChars } from '../utils';
-import { CallistoPlugin, PluginImport, PluginImportSchema, PluginInteraction, sendMessage } from '../plugin';
+import { CallistoPlugin, ForkProcess, ChildProcess, PluginImport, PluginImportSchema, PluginInteraction, sendAnswer, sendCommand } from '../plugin';
 
 export interface CallistoEventHandlers {
   onHandlingInput?: (handlingInput: boolean) => void;
@@ -16,8 +16,6 @@ export class CallistoService {
   private onHandlingInputListeners: Array<(handlingInput: boolean) => void> = [];
   private inputAdapters: CallistoInputAdapter[] = [];
   private outputAdapters: CallistoOutputAdapter[] = [];
-
-  public pluginData: { [key: string]: any } = {};
 
   private forkProcess?: ForkProcess;
 
@@ -46,6 +44,10 @@ export class CallistoService {
   }
 
   importPlugin(configFileContent: string, basePath: string, format: 'json' | 'yaml') {
+    if (!this.forkProcess) {
+      return 'No child process handler set';
+    }
+
     let config: PluginImport =
       format === 'yaml'
         ? parseYaml(configFileContent)
@@ -53,8 +55,11 @@ export class CallistoService {
 
     this.applyPlugin(ctx => {
       try {
-        config = PluginImportSchema.parse(config) as PluginImport;
-        this.addPluginInteractions(config.id, ctx, config.interactions, basePath);
+        const { resolve, interactions } = PluginImportSchema.parse(config) as PluginImport;
+
+        const process = this.forkProcess?.(resolve, basePath);
+
+        this.addPluginInteractions(process!, ctx, interactions, basePath);
       } catch (e) {
         console.error(e)
       }
@@ -62,38 +67,29 @@ export class CallistoService {
   }
 
   private addPluginInteractions(
-    id: string,
+    process: ChildProcess,
     ctx: CallistoContext,
     interactions: PluginInteraction[],
     basePath: string,
   ) {
-    interactions.forEach(({ inputs, resolve, children, goToParentContextOnceFinished }) => {
+    interactions.forEach(({ id, inputs, children, goToParentContextOnceFinished }) => {
       ctx.addInteraction(inputs, async params => {
-        if (!this.forkProcess) {
-          return 'No child process handler set';
-        }
-
         try {
-          const pluginData = this.pluginData[id] || {};
-
-          const process = this.forkProcess(resolve, params, basePath);
-          const result = await sendMessage(process, JSON.stringify({ args: params, data: pluginData }));
+          const result = await sendCommand(process, id, params);
 
           if (result.type === 'question') {
             return ask(ctx, result.response, async answer => {
-              const answerResult = await sendMessage(process, answer);
+              const answerResult = await sendAnswer(process, answer);
               return answerResult.response!;
             })
           }
-
-          this.pluginData[id] = result.data;
 
           if (!children || children.length === 0) {
             return result.response;
           }
 
           const subContext = new CallistoContext(ctx);
-          this.addPluginInteractions(id, subContext, children, basePath);
+          this.addPluginInteractions(process, subContext, children, basePath);
 
           return {
             responseText: result.response,

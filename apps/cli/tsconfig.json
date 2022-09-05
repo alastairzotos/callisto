@@ -1,7 +1,5 @@
 {
-	"include": [
-		"src"
-, "plugins/weather/src/env.ts", "plugins"	],
+	"include": ["src", "plugins"],
 	"compilerOptions": {
 		"strict": true,
 		"lib": ["ES2015", "DOM"],
@@ -9,11 +7,11 @@
 		"target": "es5",
 		"noImplicitAny": false,
 		"outDir": "dist",
-		"rootDir": "src",
+		"rootDir": ".",
 		"sourceMap": false,
 		"declaration": true,
 		"experimentalDecorators": false,
 		"emitDecoratorMetadata": false,
-		"baseUrl": "src"
+		"baseUrl": "."
 	}
 }

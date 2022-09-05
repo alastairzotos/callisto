@@ -1,10 +1,10 @@
-id: wikipedia
+resolve: ./src/wikipedia.plugin.ts
 interactions:
-  - resolve: ./src/wikipedia.plugin.main.ts
+  - id: query
     inputs: 
       - tell me about (.+)
     children:
-      - resolve: ./src/wikipedia.plugin.continue.ts
+      - id: continue
         inputs:
           - continue
           - tell me more

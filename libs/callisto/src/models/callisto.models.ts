@@ -30,8 +30,14 @@ export class CallistoAdapter {
 }
 
 export class CallistoInputAdapter extends CallistoAdapter {
+  protected resultHandler: (input: string) => Promise<void> = async input => await this.callisto?.handleInput(input);
+
+  setResultHandler(handler: (input: string) => Promise<void>) {
+    this.resultHandler = handler;
+  }
+
   async handleInput(input: string): Promise<void> {
-    await this.callisto?.handleInput(input);
+    await this.resultHandler?.(input);
   }
 }
 

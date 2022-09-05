@@ -73,7 +73,7 @@ export class SpeechInputAdapter extends CallistoInputAdapter {
     this.eventHandlers.map(handler => handler.onResult?.(transcript));
 
     if (this.callisto) {
-      await this.callisto.handleInput(transcript);
+      await this.resultHandler?.(transcript);
     }
 
     this.setRecognitionEnabled(true);

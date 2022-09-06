@@ -22,6 +22,6 @@ jobs:
 
       - name: Build and push client
         run: |
-          docker build -t bitmetro/callisto-server:${{ github.ref_name }} -f apps/web/Dockerfile . --build-arg NEXT_PUBLIC_CALLISTO_HOST=ws://callisto-server.bitmetro.io
-          docker push bitmetro/callisto-server:${{ github.ref_name }}
+          docker build -t bitmetro/callisto-client:${{ github.ref_name }} -f apps/web/Dockerfile . --build-arg NEXT_PUBLIC_CALLISTO_HOST=ws://callisto-server.bitmetro.io
+          docker push bitmetro/callisto-client:${{ github.ref_name }}
 

@@ -23,14 +23,21 @@ export const ListenButton: React.FC<Props> = ({ speechResult, prompts, speechInp
     speechInputAdapter.onListening.attach(setListening);
   }, []);
 
+  const handleClick = () => {
+    if (!!speechResult) {
+      speechResult.cancel();
+    } else {
+      speechInputAdapter.startRecognition();
+    }
+  }
+
   return (
     <StyledButton
       variant="contained"
       color={!speechResult ? 'primary' : 'warning'}
-      onMouseDown={() => speechInputAdapter.startRecognition()}
-      onTouchStart={() => speechInputAdapter.startRecognition()}
+      onClick={handleClick}
+      onTouchEnd={handleClick}
       disabled={listening}
-      onClick={() => speechResult?.cancel()}
     >
       {
         !!speechResult

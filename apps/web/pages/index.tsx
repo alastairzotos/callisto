@@ -11,6 +11,7 @@ import { Logo } from '../src/components/logo';
 
 import { ConnectionStatus } from '../src/models';
 import { ConnectionStatusDisplay } from '../src/components/connection-status';
+import { env } from '../env';
 
 const darkTheme = createTheme({
   palette: {
@@ -30,7 +31,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (typeof window !== undefined) {
-      const client = new CallistoBrowserClient({ host: process.env.NEXT_PUBLIC_CALLISTO_HOST!, retryTimeout: 3000 });
+      const client = new CallistoBrowserClient({ host: env.callistoHost, retryTimeout: 3000 });
 
       const inputAdapter = new SpeechInputAdapter();
       inputAdapter.onResult.attach(async transcript => client.sendTranscript(transcript));
@@ -55,6 +56,8 @@ const App: React.FC = () => {
       })
 
       client.onConnected.attach(() => setConnectionStatus('connected'));
+
+      client.onClose.attach(() => setConnectionStatus('reconnecting'));
 
       client.connect();
     }

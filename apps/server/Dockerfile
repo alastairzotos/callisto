@@ -4,6 +4,8 @@ WORKDIR /app
 
 COPY . .
 
+RUN npm install -g turbo
+
 RUN --mount=type=cache,target=/app/.yarn/cache \
     npx turbo prune --scope=callisto-server && \
     # cp -R .yarn out/ && \
@@ -18,7 +20,6 @@ FROM node:16-slim as app
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --chown=node:node --from=builder /app/out .
-RUN npm install -g turbo
 
 EXPOSE 8080
 

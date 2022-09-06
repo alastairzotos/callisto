@@ -5,3 +5,11 @@ interactions:
       - Ask me for a random number
     inputs: 
       - give me a random number
+    children:
+      - id: another
+        prompts: []
+        inputs:
+          - give me another one
+          - another one
+          - and another one
+          - give me another random number

@@ -1,4 +1,4 @@
-import { onInteraction, sendQuestion } from '../../libs/callisto-plugin';
+import { onInteraction, sendQuestion } from '@bitmetro/callisto-plugins';
 import { getWeather } from './get-weather';
 
 onInteraction('with-location', async ([time = 'today', location]) => await getWeather(time!, location!))

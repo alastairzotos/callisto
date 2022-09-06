@@ -1,4 +1,4 @@
-resolve: ./src/wikipedia.plugin.ts
+resolve: ./dist/wikipedia.plugin.js
 interactions:
   - id: query
     prompts:

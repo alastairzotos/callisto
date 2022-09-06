@@ -1,4 +1,4 @@
-import { onInteraction } from '../../libs/callisto-plugin';
+import { onInteraction } from '@bitmetro/callisto-plugins';
 import fetch from 'node-fetch';
 
 export const getJoke = async (): Promise<string> => {

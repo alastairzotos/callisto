@@ -1,7 +1,4 @@
 import * as z from 'zod';
-import { CallistoContext } from '../callisto';
-
-export type CallistoPlugin = (ctx: CallistoContext) => void;
 
 export const PluginInteractionSchema: z.ZodType<PluginInteraction> = z.lazy(() => z.object({
   id: z.string(),
@@ -27,16 +24,4 @@ export interface PluginInteraction {
   inputs: string[];
   children?: PluginInteraction[];
   goToParentContextOnceFinished?: boolean;
-}
-
-export interface CallistoPluginResponse {
-  type: 'response' | 'question';
-  response: string;
-}
-
-export interface CallistoPluginMessage {
-  type: 'cmd' | 'answer';
-  interactionId?: string;
-  args?: (string | undefined)[];
-  answer?: string;
 }

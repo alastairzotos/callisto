@@ -26,10 +26,23 @@ export interface CallistoResponse {
   prompts: string[];
 }
 
-export class CallistoAdapter {
-  public callisto: Callisto | undefined;
+export type CallistoPlugin = (ctx: CallistoContext) => void;
 
-  register(callisto: Callisto) {
-    this.callisto = callisto;
-  }
+export interface CallistoPluginResponse {
+  type: 'response' | 'question';
+  response: string;
 }
+
+export interface CallistoPluginMessage {
+  type: 'cmd' | 'answer';
+  interactionId?: string;
+  args?: (string | undefined)[];
+  answer?: string;
+}
+
+export interface ChildProcess {
+  send: (message: string) => void;
+  on: (event: string, callback: (...args: any[]) => void) => ChildProcess;
+}
+
+export type ForkProcess = (cmd: string, cwd: string) => ChildProcess;

@@ -1,11 +1,5 @@
-import { CallistoPluginMessage, CallistoPluginResponse } from "./models";
+import { CallistoPluginMessage, CallistoPluginResponse, ChildProcess } from "@bitmetro/callisto";
 
-export interface ChildProcess {
-  send: (message: string) => void;
-  on: (event: string, callback: (...args: any[]) => void) => ChildProcess;
-}
-
-export type ForkProcess = (cmd: string, cwd: string) => ChildProcess;
 
 export const sendMessage = (process: ChildProcess, message: string) =>
   new Promise<CallistoPluginResponse>((resolve, reject) => {

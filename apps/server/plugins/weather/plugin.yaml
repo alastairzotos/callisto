@@ -1,4 +1,4 @@
-resolve: ./src/weather.plugin.ts
+resolve: ./dist/weather.plugin.js
 interactions:
   - id: with-location
     prompts:

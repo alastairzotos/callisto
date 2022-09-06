@@ -1,11 +1,13 @@
 {
-  "name": "server",
+  "name": "callisto-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "packageManager": "yarn@1.22.10",
   "scripts": {
     "dev": "nodemon --no-stdin -q ./src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node ./dist"
   },
   "keywords": [],
   "author": "",

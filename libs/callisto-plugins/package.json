@@ -1,6 +1,6 @@
 {
-  "name": "@bitmetro/callisto-ipc",
-  "version": "1.0.0",
+  "name": "@bitmetro/callisto-plugins",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {

@@ -1,6 +1,8 @@
 {
 	"include": ["src"],
+	"exclude": ["plugins"],
 	"compilerOptions": {
+		"strict": true,
 		"lib": ["ES2015", "DOM"],
     "moduleResolution": "node",
 		"target": "es5",

@@ -1,4 +1,4 @@
-resolve: ./src/random-number.plugin.ts
+resolve: ./dist/random-number.plugin.js
 interactions:
   - id: random-number
     prompts:

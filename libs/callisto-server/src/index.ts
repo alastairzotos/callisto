@@ -1,4 +1,4 @@
-import { forkProcess } from '@bitmetro/callisto-ipc';
+import { forkProcess } from '../../callisto-plugins';
 import { Callisto, CallistoResponse } from '@bitmetro/callisto';
 import * as path from 'path';
 import * as fs from 'fs';

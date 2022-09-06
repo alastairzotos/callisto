@@ -7,6 +7,7 @@
     "libs/*"
   ],
   "scripts": {
+    "start": "turbo run start",
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
@@ -22,5 +23,5 @@
     "node": ">=14.0.0"
   },
   "dependencies": {},
-  "packageManager": "yarn@1.22.10"
+  "packageManager": "yarn@1.22.19"
 }

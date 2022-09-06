@@ -1,4 +1,4 @@
-import { onInteraction } from '@bitmetro/callisto-ipc';
+import { onInteraction } from '../../libs/callisto-plugin';
 import { getSummary } from './get-summary';
 
 let topic = '';
@@ -7,7 +7,7 @@ let sentenceIndex = 0;
 
 onInteraction('query', async (args) => {
   sentenceIndex = 0;
-  topic = args[0];
+  topic = args[0]!;
   sentences = await getSummary(topic);
 
   return sentences[0];

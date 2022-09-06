@@ -1,4 +1,4 @@
-resolve: ./src/jokes.plugin.ts
+resolve: ./dist/jokes.plugin.js
 interactions:
   - id: joke
     prompts:

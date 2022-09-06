@@ -1,0 +1,7 @@
+resolve: ./src/random-number.plugin.ts
+interactions:
+  - id: random-number
+    prompts:
+      - Ask me for a random number
+    inputs: 
+      - give me a random number

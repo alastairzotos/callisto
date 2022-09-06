@@ -30,7 +30,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (typeof window !== undefined) {
-      const client = new CallistoBrowserClient({ host: 'ws://localhost:8080', retryTimeout: 3000 });
+      const client = new CallistoBrowserClient({ host: process.env.NEXT_PUBLIC_CALLISTO_HOST!, retryTimeout: 3000 });
 
       const inputAdapter = new SpeechInputAdapter();
       inputAdapter.onResult.attach(async transcript => client.sendTranscript(transcript));

@@ -1,10 +1,17 @@
 resolve: ./src/wikipedia.plugin.ts
 interactions:
   - id: query
+    prompts:
+      - Try asking about "Rome"
+      - Ask me about Einstein
     inputs: 
       - tell me about (.+)
     children:
       - id: continue
+        prompts:
+          - Ask me to tell you more about it
+          - Ask me to continue
         inputs:
           - continue
           - tell me more
+          - tell me about it

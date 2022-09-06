@@ -66,7 +66,8 @@ export class Callisto {
     interactions: PluginInteraction[],
     basePath: string,
   ) {
-    interactions.forEach(({ id, inputs, children, goToParentContextOnceFinished }) => {
+    interactions.forEach(({ id, prompts, inputs, children, goToParentContextOnceFinished }) => {
+      ctx.addPrompts(prompts || []);
       ctx.addInteraction(inputs, async params => {
         try {
           const result = await sendCommand(process, id, params);
@@ -110,7 +111,7 @@ export class Callisto {
     if (response.error) {
       result = { error: true };
     } else {
-      result = { error: false, interactionResponse: response.interactionResponse };
+      result = { error: false, interactionResponse: response.interactionResponse, matchingContext: response.matchingContext };
 
       this.currentContext = response.matchingContext;
 

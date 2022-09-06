@@ -26,6 +26,7 @@ const App: React.FC = () => {
 
   const [speechResult, setSpeechResult] = useState<SpeechResult | undefined>(undefined);
   const [responseText, setResponseText] = useState('');
+  const [prompts, setPrompts] = useState<string[]>([]);
 
   useEffect(() => {
     if (typeof window !== undefined) {
@@ -40,13 +41,16 @@ const App: React.FC = () => {
       setSpeechInputAdapter(inputAdapter);
       setSpeechOutputAdapter(outputAdapter);
 
-      client.onMessage.attach(async ({ error, text }) => {
+      client.onMessage.attach(async ({ error, text, prompts }) => {
         if (error) {
           setResponseText('No match');
           await outputAdapter.speakResponse(`Sorry, I don't understand`);
         } else {
+          setPrompts(prompts);
           setResponseText(text);
-          await outputAdapter.speakResponse(text);
+          if (text !== '') {
+            await outputAdapter.speakResponse(text);
+          }
         }
       })
 
@@ -76,7 +80,7 @@ const App: React.FC = () => {
 
             <ListenButton
               speechResult={speechResult}
-              prompts={['TODO']}
+              prompts={prompts}
               speechInputAdapter={speechInputAdapter}
             />
 

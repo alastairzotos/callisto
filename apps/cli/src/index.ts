@@ -18,11 +18,10 @@ client.onConnected.attach(() => {
   query();
 })
 
-client.onMessage.attach(({ error, text, prompts }) => {
+client.onMessage.attach(({ error, text }) => {
   if (error) {
     console.log(`[${chalk.blueBright('Callisto')}]: ${chalk.gray(`Sorry, I don't understand`)}`);
   } else {
-    console.log(prompts);
     console.log(`[${chalk.blueBright('Callisto')}]: ${chalk.gray(text)}`);
   }
   query();

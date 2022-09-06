@@ -1,10 +1,14 @@
 resolve: ./src/jokes.plugin.ts
 interactions:
   - id: joke
+    prompts:
+      - Ask me for a joke
     inputs: 
       - tell me a joke
     children:
       - id: continue
+        prompts:
+          - Ask me for another one
         inputs:
           - continue
           - tell me another one

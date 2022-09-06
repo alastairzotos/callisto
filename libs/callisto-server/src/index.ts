@@ -24,9 +24,15 @@ export class CallistoServer {
         ws.send(JSON.stringify({
           error,
           text: interactionResponse?.responseText,
-          prompts: matchingContext?.getPrompts()
+          prompts: callisto.getContextChain().map(ctx => ctx.getPrompts()).flat(),
         } as CallistoResponse));
       })
+
+      ws.send(JSON.stringify({
+        error: false,
+        text: '',
+        prompts: callisto.getContextChain().map(ctx => ctx.getPrompts()).flat(),
+      } as CallistoResponse))
     })
 
     console.log(`Callisto server running on ws://localhost:${port}`);

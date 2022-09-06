@@ -12,15 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Login
+      - name: Docker login
         run: docker login -u bitmetro -p ${{ secrets.DOCKER_PASSWORD }} docker.io
 
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          context: .
-          tags: bitmetro/callisto:${{ github.ref_name }}
-          build-args: |
-            NEXT_PUBLIC_PRODUCTION=true
-            NEXT_PUBLIC_WEATHER_API_KEY=${{ secrets.NEXT_PUBLIC_WEATHER_API_KEY }}
+      - name: Build and push server
+        run: |
+          docker build -t bitmetro/callisto-server:${{ github.ref_name }} -f apps/server/Dockerfile .
+          docker push bitmetro/callisto-server:${{ github.ref_name }}
+

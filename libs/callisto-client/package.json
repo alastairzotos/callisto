@@ -11,7 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@bitmetro/callisto": "*"
+    "@bitmetro/callisto": "*",
+    "websocket": "^1.0.34"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/websocket": "^1.0.5"
+  }
 }

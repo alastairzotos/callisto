@@ -23,6 +23,7 @@ export interface InteractionHandlerResponse {
 export interface CallistoResponse {
   error: boolean;
   text: string;
+  prompts: string[];
 }
 
 export class CallistoAdapter {

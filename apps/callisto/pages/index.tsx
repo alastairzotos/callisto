@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Container, CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { SpeechResult, SpeechInputAdapter, SpeechOutputAdapter } from '@bitmetro/callisto';
-import { CallistoClient } from '@bitmetro/callisto-client';
+import { CallistoClientBrowser } from '@bitmetro/callisto-client';
 
 import { ListenButton } from '../src/components/listen-button';
 import { Results } from '../src/components/results';
@@ -29,29 +29,8 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (typeof window !== undefined) {
-      // let ws: WebSocket;
-      // const connect = async () => {
-      //   ws = new WebSocket('ws://localhost:8080');
-      
-      //   ws.addEventListener('open', () => setConnectionStatus('connected'))
-      
-      //   ws.addEventListener('message', async ({ data }) => {
-      //     setResponseText(data);
-      //     await outputAdapter.speakResponse({ responseText: data })
-      //   })
-      
-      //   ws.addEventListener('close', () => {
-      //     setConnectionStatus('reconnecting');
-      //     setTimeout(connect, 3000);
-      //   })
-      
-      //   ws.addEventListener('error', () => {})
-      // }
-      
-      // connect();
+      const client = new CallistoClientBrowser({ host: 'ws://localhost:8080', retryTimeout: 3000 });
 
-      const client = new CallistoClient({ host: 'ws://localhost:8080', retryTimeout: 3000 });
-      
       const inputAdapter = new SpeechInputAdapter();
       inputAdapter.onResult.attach(async transcript => client.sendTranscript(transcript));
 
@@ -61,9 +40,14 @@ const App: React.FC = () => {
       setSpeechInputAdapter(inputAdapter);
       setSpeechOutputAdapter(outputAdapter);
 
-      client.onMessage.attach(async ({ text }) => {
-        setResponseText(text);
-        await outputAdapter.speakResponse(text)
+      client.onMessage.attach(async ({ error, text }) => {
+        if (error) {
+          setResponseText('No match');
+          await outputAdapter.speakResponse(`Sorry, I don't understand`);
+        } else {
+          setResponseText(text);
+          await outputAdapter.speakResponse(text);
+        }
       })
 
       client.onConnected.attach(() => setConnectionStatus('connected'));
@@ -79,7 +63,7 @@ const App: React.FC = () => {
         <meta name="description" content="A simple virtual assistant framework for TypeScript" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      
+
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
 

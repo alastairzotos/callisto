@@ -20,8 +20,12 @@ export class CallistoServer {
       const callisto = this.createCallistoInstance();
 
       ws.on('message', async msg => {
-        const { error, interactionResponse } = await callisto.handleInput(msg.toString());
-        ws.send(JSON.stringify({ error, text: interactionResponse?.responseText } as CallistoResponse));
+        const { error, interactionResponse, matchingContext } = await callisto.handleInput(msg.toString());
+        ws.send(JSON.stringify({
+          error,
+          text: interactionResponse?.responseText,
+          prompts: matchingContext?.getPrompts()
+        } as CallistoResponse));
       })
     })
 

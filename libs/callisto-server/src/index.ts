@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as ws from 'ws';
 import { parse as parseYaml } from 'yaml';
 import { execSync } from 'child_process';
+import * as express from 'express';
 
 import { sendAnswer, sendCommand } from './ipc';
 import { PluginImport, PluginImportSchema, PluginInteraction } from './models';
@@ -30,7 +31,11 @@ export class CallistoServer {
   start(port = 8080) {
     this.importPlugins();
 
-    this.wss = new ws.WebSocketServer({ port });
+    const app = express();
+
+    app.get('/health', (_, res) => res.send('healthy'));
+
+    this.wss = new ws.WebSocketServer({ server: app.listen(port) });
 
     this.wss.on('connection', ws => {
       const callisto = new Callisto();

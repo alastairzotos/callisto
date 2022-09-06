@@ -58,10 +58,10 @@ const handlePluginImport = (callisto: Callisto, name: string, configFileContent:
   console.log(basePath);
 
   console.log('Installing dependencies');
-  execSync('npm i', { cwd: basePath });
+  execSync('npm i', { cwd: basePath, stdio: 'inherit' });
 
   console.log('Building');
-  execSync('npm run build', { cwd: basePath });
+  execSync('npm run build', { cwd: basePath, stdio: 'inherit' });
 
   callisto.applyPlugin(ctx => {
     try {
@@ -91,7 +91,7 @@ export class CallistoServer {
 
     this.wss.on('connection', ws => {
       const callisto = this.createCallistoInstance();
-
+      
       ws.on('message', async msg => {
         const { error, interactionResponse } = await callisto.handleInput(msg.toString());
         ws.send(JSON.stringify({

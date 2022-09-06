@@ -37,7 +37,7 @@ export class CallistoServer {
 
     this.wss.on('connection', ws => {
       const handle = this.createHandle();
-      this.debug(`Received connection. Setting handle to ${handle}`);
+      this.debug(`Received connection. Setting handle to ${handle}`, handle);
 
       const callisto = new Callisto();
       const processes = this.plugins.map(plugin => this.applyPlugin(callisto, handle, plugin));
@@ -54,6 +54,7 @@ export class CallistoServer {
       })
 
       ws.on('close', () => {
+        this.debug(`Lost connection to ${handle}`, handle);
         processes.forEach(process => {
           process.kill()
           this.debug(`Killed process ${process.pid}`, handle);

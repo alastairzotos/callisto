@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Container, CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { SpeechResult, SpeechInputAdapter, SpeechOutputAdapter } from '@bitmetro/callisto';
-import { CallistoClientBrowser } from '@bitmetro/callisto-client';
+import { CallistoBrowserClient } from '@bitmetro/callisto-client';
 
 import { ListenButton } from '../src/components/listen-button';
 import { Results } from '../src/components/results';
@@ -30,7 +30,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (typeof window !== undefined) {
-      const client = new CallistoClientBrowser({ host: 'ws://localhost:8080', retryTimeout: 3000 });
+      const client = new CallistoBrowserClient({ host: 'ws://localhost:8080', retryTimeout: 3000 });
 
       const inputAdapter = new SpeechInputAdapter();
       inputAdapter.onResult.attach(async transcript => client.sendTranscript(transcript));

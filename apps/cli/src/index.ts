@@ -1,5 +1,5 @@
 import * as chalk from 'chalk';
-import { CallistoClientNode } from '@bitmetro/callisto-client';
+import { CallistoNodeClient } from '@bitmetro/callisto-client';
 import * as readline from 'readline';
 
 const rl = readline.createInterface({
@@ -9,7 +9,7 @@ const rl = readline.createInterface({
 
 const question = (q: string) => new Promise<string>(resolve => rl.question(q, resolve))
 
-const client = new CallistoClientNode({ host: 'ws://localhost:8080', retryTimeout: 3000 });
+const client = new CallistoNodeClient({ host: 'ws://localhost:8080', retryTimeout: 3000 });
 
 const query = async () => client.sendTranscript(await question(`[${chalk.yellow('You')}]: `))
 
@@ -21,7 +21,7 @@ client.onConnected.attach(() => {
 client.onMessage.attach(({ error, text }) => {
   if (error) {
     console.log(`[${chalk.blueBright('Callisto')}]: ${chalk.gray(`Sorry, I don't understand`)}`);
-  } else {
+  } else if (text !== '') {
     console.log(`[${chalk.blueBright('Callisto')}]: ${chalk.gray(text)}`);
   }
   query();

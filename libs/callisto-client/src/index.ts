@@ -22,7 +22,7 @@ export class CallistoClient implements ICallistoClient {
   connect(): void {}
 }
 
-export class CallistoClientNode extends CallistoClient {
+export class CallistoNodeClient extends CallistoClient {
   private conn: connection | undefined;
   
   sendTranscript(transcript: string) {
@@ -53,7 +53,7 @@ export class CallistoClientNode extends CallistoClient {
   }
 }
 
-export class CallistoClientBrowser extends CallistoClient {
+export class CallistoBrowserClient extends CallistoClient {
   private ws: WebSocket | undefined;
 
   sendTranscript(transcript: string) {

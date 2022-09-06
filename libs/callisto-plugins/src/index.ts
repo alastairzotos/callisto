@@ -1,5 +1,4 @@
-import { fork } from 'child_process';
-import { CallistoPluginMessage, CallistoPluginResponse, ForkProcess } from '@bitmetro/callisto';
+import { CallistoPluginMessage, CallistoPluginResponse } from '@bitmetro/callisto';
 
 let answerCallback: ((answer: string) => void | undefined);
 
@@ -37,6 +36,3 @@ export const sendQuestion = (question: string, cb: (answer: string) => void) => 
 export const sendResponse = (response: string) => {
   process.send?.({ type: 'response', response } as CallistoPluginResponse);
 }
-
-export const forkProcess: ForkProcess = (cmd: string, cwd: string) => fork(cmd, { cwd })
-

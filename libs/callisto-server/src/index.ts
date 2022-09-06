@@ -1,15 +1,13 @@
-import { forkProcess } from '@bitmetro/callisto-plugins';
-import { ask, Callisto, CallistoContext, CallistoResponse, ChildProcess } from '@bitmetro/callisto';
+import { ask, Callisto, CallistoContext, CallistoResponse } from '@bitmetro/callisto';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as ws from 'ws';
 import { parse as parseYaml } from 'yaml';
-import { execSync } from 'child_process';
+import { execSync, fork, ChildProcess } from 'child_process';
 import * as express from 'express';
 
 import { sendAnswer, sendCommand } from './ipc';
 import { PluginImport, PluginImportSchema, PluginInteraction } from './models';
-
 
 interface PluginRef {
   name: string;
@@ -38,16 +36,28 @@ export class CallistoServer {
     this.wss = new ws.WebSocketServer({ server: app.listen(port) });
 
     this.wss.on('connection', ws => {
+      const handle = this.createHandle();
+      this.debug(`Received connection. Setting handle to ${handle}`);
+
       const callisto = new Callisto();
-      this.plugins.forEach(plugin => this.applyPlugin(callisto, plugin));
+      const processes = this.plugins.map(plugin => this.applyPlugin(callisto, handle, plugin));
 
       ws.on('message', async msg => {
+        this.debug(`Received message: ${msg}`, handle);
+
         const { error, interactionResponse } = await callisto.handleInput(msg.toString());
         ws.send(JSON.stringify({
           error,
           text: interactionResponse?.responseText,
           prompts: callisto.getContextChain().map(ctx => ctx.getPrompts()).flat(),
         } as CallistoResponse));
+      })
+
+      ws.on('close', () => {
+        processes.forEach(process => {
+          process.kill()
+          this.debug(`Killed process ${process.pid}`, handle);
+        });
       })
 
       ws.send(JSON.stringify({
@@ -57,7 +67,7 @@ export class CallistoServer {
       } as CallistoResponse))
     })
 
-    console.log(`Callisto server running on ws://localhost:${port}`);
+    this.debug(`Callisto server running on ws://localhost:${port}`);
   }
 
   private importPlugins() {
@@ -72,7 +82,7 @@ export class CallistoServer {
     const name = path.basename(pluginPath);
     const format = pluginFile.endsWith('.yaml') || pluginFile.endsWith('.yml') ? 'yaml' : 'json';
 
-    console.log(`Importing plugin ${name}`);
+    this.debug(`Importing plugin ${name}`);
 
     try {
       let config: PluginImport =
@@ -82,10 +92,10 @@ export class CallistoServer {
 
       const { resolve, interactions } = PluginImportSchema.parse(config) as PluginImport;
 
-      console.log('Installing dependencies');
+      this.debug('Installing dependencies');
       execSync('npm i', { cwd: pluginPath, stdio: 'inherit' });
 
-      console.log('Building');
+      this.debug('Building');
       execSync('npm run build', { cwd: pluginPath, stdio: 'inherit' });
 
       this.plugins.push({ name, resolve, pluginPath, interactions })
@@ -95,12 +105,14 @@ export class CallistoServer {
     }
   }
 
-  private applyPlugin(callisto: Callisto, { name, resolve, pluginPath, interactions }: PluginRef) {
-    callisto.applyPlugin(ctx => {
-      const process = forkProcess?.(resolve, pluginPath);
+  private applyPlugin(callisto: Callisto, handle, { resolve, pluginPath, interactions }: PluginRef) {
+    const process = fork(resolve, { cwd: pluginPath });
 
-      this.addPluginInteractions(process!, ctx, interactions, pluginPath);
-    });
+    this.debug(`Created process ${process.pid}`, handle);
+
+    this.addPluginInteractions(process!, callisto.getRootContext(), interactions, pluginPath);
+
+    return process;
   }
 
   private addPluginInteractions(
@@ -139,5 +151,17 @@ export class CallistoServer {
         }
       })
     })
+  }
+
+  private createHandle() {
+    return Math.round(Math.random() * 9999) + 1;
+  }
+
+  private debug(msg: string, handle = -1) {
+    if (handle >= 0) {
+      console.log(`[DEBUG][${handle}] ${msg}`);
+    } else {
+      console.log(`[DEBUG] ${msg}`);
+    }
   }
 }

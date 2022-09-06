@@ -39,10 +39,3 @@ export interface CallistoPluginMessage {
   args?: (string | undefined)[];
   answer?: string;
 }
-
-export interface ChildProcess {
-  send: (message: string) => void;
-  on: (event: string, callback: (...args: any[]) => void) => ChildProcess;
-}
-
-export type ForkProcess = (cmd: string, cwd: string) => ChildProcess;

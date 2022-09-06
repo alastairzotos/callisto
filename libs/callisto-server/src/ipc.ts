@@ -1,5 +1,5 @@
-import { CallistoPluginMessage, CallistoPluginResponse, ChildProcess } from "@bitmetro/callisto";
-
+import { ChildProcess } from 'child_process';
+import { CallistoPluginMessage, CallistoPluginResponse } from "@bitmetro/callisto";
 
 export const sendMessage = (process: ChildProcess, message: string) =>
   new Promise<CallistoPluginResponse>((resolve, reject) => {

@@ -16,6 +16,10 @@ export class Callisto {
     plugins.forEach(plugin => this.applyPlugin(plugin));
   }
 
+  getRootContext() {
+    return this.rootContext;
+  }
+
   getContextChain(): CallistoContext[] {
     const chain: CallistoContext[] = [];
     let context = this.currentContext;

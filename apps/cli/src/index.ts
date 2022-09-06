@@ -1,6 +1,9 @@
 import * as chalk from 'chalk';
 import { CallistoNodeClient } from '@bitmetro/callisto-client';
 import * as readline from 'readline';
+import { config } from 'dotenv';
+
+config();
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -9,7 +12,9 @@ const rl = readline.createInterface({
 
 const question = (q: string) => new Promise<string>(resolve => rl.question(q, resolve))
 
-const client = new CallistoNodeClient({ host: 'ws://localhost:8080', retryTimeout: 3000 });
+// Create a .env file in this root of this app (apps/cli) with
+// CALLISTO_SERVER_URL=ws://localhost:8080
+const client = new CallistoNodeClient({ host: process.env.CALLISTO_SERVER_URL!, retryTimeout: 3000 });
 
 const query = async () => client.sendTranscript(await question(`[${chalk.yellow('You')}]: `))
 

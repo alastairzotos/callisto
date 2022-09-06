@@ -13,7 +13,8 @@ interface Props {
 const StyledButton = styled(Button)(() => ({
   borderRadius: 50,
   padding: 20,
-  width: '100%'
+  width: '100%',
+  maxHeight: 64
 }))
 
 export const ListenButton: React.FC<Props> = ({ speechResult, prompts, speechInputAdapter }) => {

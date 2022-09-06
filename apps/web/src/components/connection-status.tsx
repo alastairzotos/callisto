@@ -11,6 +11,15 @@ const fadeInAndOut = keyframes`
   50% { opacity: 1 }
 `
 
+const Wrapper = styled('div')(() => ({
+  width: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+  position: 'fixed',
+  bottom: 20,
+  zIndex: 1000
+}))
+
 const SuccessIndicator = styled('span')(() => ({
   color: 'rgb(0, 255, 0)',
   animation: `${fadeInAndOut} 4s linear infinite`,
@@ -18,7 +27,7 @@ const SuccessIndicator = styled('span')(() => ({
 
 export const ConnectionStatusDisplay: React.FC<Props> = ({ status }) => {
   return (
-    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: 50 }}>
+    <Wrapper>
       {
         status === 'connecting'
           ? <Typography variant='subtitle2'>Connecting to Callisto server...</Typography>
@@ -28,6 +37,6 @@ export const ConnectionStatusDisplay: React.FC<Props> = ({ status }) => {
               : <Typography variant='subtitle2' color='error'><CircularProgress size={10} /> Connection lost. Retrying..</Typography>
           )
       }
-    </div>
+    </Wrapper>
   )
 }

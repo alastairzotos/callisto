@@ -76,7 +76,7 @@ const App: React.FC = () => {
 
         {(!!speechInputAdapter && !!speechOutputAdapter) && (
           <Container maxWidth="sm">
-            <div style={{ height: 'calc(100vh - 180px)', padding: 20 }}>
+            <div style={{ height: 'calc(100vh - 200px)', padding: 20 }}>
               <Logo />
               <Results speechInputAdapter={speechInputAdapter} responseText={responseText} />
             </div>
@@ -87,9 +87,10 @@ const App: React.FC = () => {
               speechInputAdapter={speechInputAdapter}
             />
 
-            <ConnectionStatusDisplay status={connectionStatus} />
           </Container>
         )}
+
+        <ConnectionStatusDisplay status={connectionStatus} />
       </ThemeProvider>
     </div>
   );

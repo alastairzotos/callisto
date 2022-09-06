@@ -9,7 +9,7 @@ const Wrapper = styled('div')(() => ({
 }));
 
 const LogoImg = styled('img')(() => ({
-  width: 300,
+  width: 200,
 }))
 
 export const Logo: React.FC = () => {

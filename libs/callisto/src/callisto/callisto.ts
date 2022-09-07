@@ -39,7 +39,7 @@ export class Callisto {
       this.currentContext = this.rootContext;
     }
 
-    const response = await this.currentContext.handleInput(stripInputOfExtraChars(input));
+    const response = await this.currentContext.handleInput(stripInputOfExtraChars(input.toLocaleLowerCase()));
     let result: InteractionHandlerResponse;
 
     if (response.error) {

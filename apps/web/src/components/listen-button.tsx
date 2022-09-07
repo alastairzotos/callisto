@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button, styled } from '@mui/material';
 import { SpeechInputAdapter, SpeechResult } from '@bitmetro/callisto';
 
 import { Prompts } from './prompts';
 
 interface Props {
-  speechResult?: SpeechResult;
+  disconnected: boolean;
+  speaking: boolean;
+  onCancel: () => void;
   prompts: string[];
   speechInputAdapter: SpeechInputAdapter;
 }
@@ -17,7 +19,7 @@ const StyledButton = styled(Button)(() => ({
   maxHeight: 64
 }))
 
-export const ListenButton: React.FC<Props> = ({ speechResult, prompts, speechInputAdapter }) => {
+export const ListenButton: React.FC<Props> = ({ disconnected, speaking, onCancel, prompts, speechInputAdapter }) => {
   const [listening, setListening] = useState(false);
 
   useEffect(() => {
@@ -25,8 +27,8 @@ export const ListenButton: React.FC<Props> = ({ speechResult, prompts, speechInp
   }, []);
 
   const handleClick = () => {
-    if (!!speechResult) {
-      speechResult.cancel();
+    if (speaking) {
+      onCancel();
     } else {
       speechInputAdapter.startRecognition();
     }
@@ -35,18 +37,21 @@ export const ListenButton: React.FC<Props> = ({ speechResult, prompts, speechInp
   return (
     <StyledButton
       variant="contained"
-      color={!speechResult ? 'primary' : 'warning'}
+      color={!speaking ? 'primary' : 'warning'}
       onClick={handleClick}
-      onTouchEnd={handleClick}
-      disabled={listening}
+      disabled={disconnected || listening}
     >
       {
-        !!speechResult
-          ? 'Cancel'
+        disconnected
+          ? 'Disconnected'
           : (
-            listening
-              ? 'Listening'
-              : <Prompts prompts={prompts} cycleDuration={4000} />
+            speaking
+              ? 'Cancel'
+              : (
+                listening
+                  ? 'Listening'
+                  : <Prompts prompts={prompts} cycleDuration={4000} />
+              )
           )
       }
     </StyledButton>

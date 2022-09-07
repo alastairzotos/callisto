@@ -20,14 +20,19 @@ const query = async () => client.sendTranscript(await question(`[${chalk.yellow(
 
 client.onConnected.attach(() => {
   console.log(chalk.green('Connected to Callisto server'));
-  query();
 })
 
-client.onMessage.attach(({ error, text }) => {
-  if (error) {
-    console.log(`[${chalk.blueBright('Callisto')}]: ${chalk.gray(`Sorry, I don't understand`)}`);
-  } else if (text !== '') {
-    console.log(`[${chalk.blueBright('Callisto')}]: ${chalk.gray(text)}`);
+client.onMessage.attach(({ type, error, text, prompts }) => {
+  if (type === 'message') {
+    if (error) {
+      console.log(`[${chalk.blueBright('Callisto')}]: ${chalk.gray(`Sorry, I don't understand`)}`);
+    } else if (text !== '') {
+      console.log(`[${chalk.blueBright('Callisto')}]: ${chalk.gray(text)}`);
+    }
+  } else if (type === 'prompts') {
+    prompts.forEach(prompt => {
+      console.log(`[${chalk.blueBright('Callisto')}]: ${chalk.gray(prompt)}`);
+    })
   }
   query();
 })

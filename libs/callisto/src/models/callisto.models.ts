@@ -20,9 +20,12 @@ export interface InteractionHandlerResponse {
   matchingContext?: CallistoContext;
 }
 
+export type CallistoResponseType = 'message' | 'prompts';
+
 export interface CallistoResponse {
+  type: CallistoResponseType;
   error: boolean;
-  text: string;
+  text?: string;
   prompts: string[];
 }
 

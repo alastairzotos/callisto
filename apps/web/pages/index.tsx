@@ -45,16 +45,17 @@ const App: React.FC = () => {
       setSpeechInputAdapter(inputAdapter);
       setSpeechOutputAdapter(outputAdapter);
 
-      client.onMessage.attach(async ({ error, text, prompts }) => {
-        if (error) {
-          setResponseText('No match');
-          await outputAdapter.speakResponse(`Sorry, I don't understand`);
-        } else {
-          setPrompts(prompts);
-          setResponseText(text);
-          if (text !== '') {
+      client.onMessage.attach(async ({ type, error, text, prompts }) => {
+        if (type === 'message') {
+          if (error) {
+            setResponseText('No match');
+            await outputAdapter.speakResponse(`Sorry, I don't understand`);
+          } else if (text) {
+            setResponseText(text);
             await outputAdapter.speakResponse(text);
           }
+        } else {
+          setPrompts(prompts);
         }
       })
 
@@ -85,7 +86,12 @@ const App: React.FC = () => {
             </div>
 
             <ListenButton
-              speechResult={speechResult}
+              disconnected={connectionStatus !== 'connected'}
+              speaking={!!speechResult}
+              onCancel={() => {
+                speechResult?.cancel();
+                setSpeechResult(undefined);
+              }}
               prompts={prompts}
               speechInputAdapter={speechInputAdapter}
             />

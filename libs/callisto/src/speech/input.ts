@@ -56,7 +56,7 @@ export class SpeechInputAdapter {
         this.recognition.onresult = (event) => {
           const result = event.results[event.resultIndex];
 
-          const transcript = result[0].transcript.trim().toLocaleLowerCase();
+          const transcript = result[0].transcript.trim();
 
           if (result.isFinal) {
             this.handleResult(transcript);

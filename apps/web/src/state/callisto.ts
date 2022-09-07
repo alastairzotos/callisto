@@ -38,7 +38,6 @@ interface CallistoActions {
 type CallistoState = CallistoValues & CallistoActions;
 
 const defaultServers = {
-  localhost: 'ws://localhost:8080',
   bitmetro: 'wss://callisto-server.bitmetro.io'
 };
 
@@ -57,12 +56,12 @@ const createCallistoState = (initialValues: CallistoValues) =>
 
       set({
         knownServers,
-        selectedServerName: getLocalStorage(SELECTED_SERVER_KEY, 'localhost')
+        selectedServerName: getLocalStorage(SELECTED_SERVER_KEY, 'bitmetro')
       })
     },
 
     createClient: () => {
-      const client = new CallistoBrowserClient({ host: self().knownServers![self().selectedServerName || 'localhost'], retryTimeout: 3000 });
+      const client = new CallistoBrowserClient({ host: self().knownServers![self().selectedServerName || 'bitmetro'], retryTimeout: 3000 });
 
       set({
         client,

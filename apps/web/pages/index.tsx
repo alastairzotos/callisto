@@ -22,7 +22,6 @@ const darkTheme = createTheme({
 
 const App: React.FC = () => {
   const { configure: configureCallisto, createClient } = useCallisto();
-
   const { configure: configureSpeech } = useSpeech();
 
   useEffect(() => {
@@ -46,14 +45,11 @@ const App: React.FC = () => {
         <Settings />
 
         <Container maxWidth="sm">
-          <div style={{ height: 'calc(100vh - 200px)', padding: 20 }}>
-            <Logo />
-            <Results />
-          </div>
-
-          <ListenButton />
+          <Logo />
+          <Results />
         </Container>
 
+        <ListenButton />
         <ConnectionStatusDisplay />
       </ThemeProvider>
     </div>

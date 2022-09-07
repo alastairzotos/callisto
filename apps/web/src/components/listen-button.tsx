@@ -4,11 +4,19 @@ import { Button, styled } from '@mui/material';
 import { Prompts } from './prompts';
 import { useCallisto, useSpeech } from '../state';
 
+const Wrapper = styled('div')(() => ({
+  width: '100%',
+  position: 'fixed',
+  bottom: 80,
+  display: 'flex',
+  justifyContent: 'center'
+}))
+
 const StyledButton = styled(Button)(() => ({
   borderRadius: 50,
   padding: 20,
-  width: '100%',
-  maxHeight: 64
+  width: '90%',
+  maxHeight: 64,
 }))
 
 export const ListenButton: React.FC = () => {
@@ -34,25 +42,27 @@ export const ListenButton: React.FC = () => {
   }
 
   return (
-    <StyledButton
-      variant="contained"
-      color={!speaking ? 'primary' : 'warning'}
-      onClick={handleClick}
-      disabled={disconnected || listening}
-    >
-      {
-        disconnected
-          ? 'Disconnected'
-          : (
-            speaking
-              ? 'Cancel'
-              : (
-                listening
-                  ? 'Listening'
-                  : <Prompts prompts={prompts} cycleDuration={4000} />
-              )
-          )
-      }
-    </StyledButton>
+    <Wrapper>
+      <StyledButton
+        variant="contained"
+        color={!speaking ? 'primary' : 'warning'}
+        onClick={handleClick}
+        disabled={disconnected || listening}
+      >
+        {
+          disconnected
+            ? 'Disconnected'
+            : (
+              speaking
+                ? 'Cancel'
+                : (
+                  listening
+                    ? 'Listening'
+                    : <Prompts prompts={prompts} cycleDuration={4000} />
+                )
+            )
+        }
+      </StyledButton>
+    </Wrapper>
   )
 }

@@ -5,7 +5,7 @@ const Wrapper = styled('div')(() => ({
   display: 'flex',
   justifyContent: 'center',
   width: '100%',
-  marginTop: 50
+  marginTop: 20
 }));
 
 const LogoImg = styled('img')(() => ({

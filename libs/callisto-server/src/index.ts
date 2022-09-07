@@ -160,9 +160,9 @@ export class CallistoServer {
 
   private debug(msg: string, handle = -1) {
     if (handle >= 0) {
-      console.log(`[DEBUG][${handle}] ${msg}`);
+      console.log(`${(new Date()).toISOString()} [DEBUG][${handle}] ${msg}`);
     } else {
-      console.log(`[DEBUG] ${msg}`);
+      console.log(`${(new Date()).toISOString()} [DEBUG] ${msg}`);
     }
   }
 }

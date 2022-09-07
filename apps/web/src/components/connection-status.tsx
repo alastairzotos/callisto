@@ -4,6 +4,7 @@ import { ConnectionStatus } from '../models';
 
 interface Props {
   status: ConnectionStatus;
+  serverName?: string;
 }
 
 const fadeInAndOut = keyframes`
@@ -25,16 +26,20 @@ const SuccessIndicator = styled('span')(() => ({
   animation: `${fadeInAndOut} 4s linear infinite`,
 }))
 
-export const ConnectionStatusDisplay: React.FC<Props> = ({ status }) => {
+export const ConnectionStatusDisplay: React.FC<Props> = ({ serverName, status }) => {
   return (
     <Wrapper>
       {
-        status === 'connecting'
-          ? <Typography variant='subtitle2'>Connecting to Callisto server...</Typography>
+        !serverName
+          ? 'No server selected'
           : (
-            status === 'connected'
-              ? <Typography variant='subtitle2'><SuccessIndicator>&#9679;</SuccessIndicator> Connected to Callisto server</Typography>
-              : <Typography variant='subtitle2' color='error'><CircularProgress size={10} /> Connection lost. Retrying..</Typography>
+            status === 'connecting'
+              ? <Typography variant='subtitle2'>Connecting to {serverName} server...</Typography>
+              : (
+                status === 'connected'
+                  ? <Typography variant='subtitle2'><SuccessIndicator>&#9679;</SuccessIndicator> Connected to server: {serverName}</Typography>
+                  : <Typography variant='subtitle2' color='error'><CircularProgress size={10} /> Connection lost. Retrying..</Typography>
+              )
           )
       }
     </Wrapper>

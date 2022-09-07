@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, styled, Chip } from '@mui/material';
+import { Typography, styled } from '@mui/material';
 import { SpeechInputAdapter } from '@bitmetro/callisto';
 
 interface Props {
-  speechInputAdapter: SpeechInputAdapter;
+  interim: string;
+  speechResultText: string;
   responseText: string;
 }
 
@@ -27,37 +28,20 @@ const InputWrapper = styled('div')(() => ({
 const firstUppercase = (text: string) =>
   (text && text.length) ? text[0].toLocaleUpperCase() + text.slice(1) : ''
 
-export const Results: React.FC<Props> = ({ speechInputAdapter, responseText }) => {
-  const [interim, setInterim] = useState('');
-  const [result, setResult] = useState('');
-  const [response, setResponse] = useState(responseText);
-
-  useEffect(() => {
-    speechInputAdapter.onInterim.attach(setInterim);
-    speechInputAdapter.onResult.attach(async result => setResult(result));
-    speechInputAdapter.onListening.attach(listening => {
-      if (listening) {
-        setResult('');
-      }
-      setResponse('')
-    })
-  }, []);
-
-  useEffect(() => setResponse(responseText), [responseText]);
-
+export const Results: React.FC<Props> = ({ interim, speechResultText, responseText }) => {
   return (
     <Wrapper>
-      {(result || interim) && (
+      {(speechResultText || interim) && (
         <InputWrapper>
           <Bubble type='input'>
-            <Typography>{firstUppercase(result || interim)}</Typography>
+            <Typography>{firstUppercase(speechResultText || interim)}</Typography>
           </Bubble>
         </InputWrapper>
       )}
 
-      {response && (
+      {responseText && (
         <Bubble type='response'>
-          <Typography>{response}</Typography>
+          <Typography>{responseText}</Typography>
         </Bubble>
       )}
     </Wrapper>

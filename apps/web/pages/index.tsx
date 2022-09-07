@@ -8,6 +8,7 @@ import { CallistoBrowserClient } from '@bitmetro/callisto-client';
 import { ListenButton } from '../src/components/listen-button';
 import { Results } from '../src/components/results';
 import { Logo } from '../src/components/logo';
+import { Settings } from '../src/components/settings';
 
 import { ConnectionStatus } from '../src/models';
 import { ConnectionStatusDisplay } from '../src/components/connection-status';
@@ -22,6 +23,11 @@ const darkTheme = createTheme({
   }
 });
 
+const knownServers: { [name: string]: string } = {
+  bitmetro: 'wss://callisto-server.bitmetro.io',
+  localhost: 'ws://localhost:8080'
+}
+
 const App: React.FC = () => {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('connecting')
 
@@ -29,43 +35,72 @@ const App: React.FC = () => {
   const [speechOutputAdapter, setSpeechOutputAdapter] = useState<SpeechOutputAdapter | null>(null);
 
   const [speechResult, setSpeechResult] = useState<SpeechResult | undefined>(undefined);
-  const [responseText, setResponseText] = useState('');
   const [prompts, setPrompts] = useState<string[]>([]);
 
+  const [selectedServerName, setSelectedServerName] = useState<string | undefined>();
+
+  const [listening, setListening] = useState(false);
+  const [responseText, setResponseText] = useState('');
+  const [interim, setInterim] = useState('');
+  const [speechResultText, setSpeechResultText] = useState('');
+
   useEffect(() => {
-    if (typeof window !== undefined) {
-      const client = new CallistoBrowserClient({ host: env.callistoHost, retryTimeout: 3000 });
+    if (!!selectedServerName) {
+      if (typeof window !== undefined) {
+        const client = new CallistoBrowserClient({ host: knownServers[selectedServerName], retryTimeout: 3000 });
 
-      const inputAdapter = new SpeechInputAdapter();
-      inputAdapter.onResult.attach(async transcript => client.sendTranscript(transcript));
+        setResponseText('');
+        setInterim('');
+        setSpeechResultText('');
 
-      const outputAdapter = new SpeechOutputAdapter();
-      outputAdapter.onSpeaking.attach(setSpeechResult);
+        let inputAdapter = speechInputAdapter;
+        let outputAdapter = speechOutputAdapter;
 
-      setSpeechInputAdapter(inputAdapter);
-      setSpeechOutputAdapter(outputAdapter);
+        if (!inputAdapter && !outputAdapter) {
+          inputAdapter = new SpeechInputAdapter();
+          inputAdapter.onListening.attach(setListening);
+          inputAdapter.onResult.attach(async transcript => client.sendTranscript(transcript));
 
-      client.onMessage.attach(async ({ type, error, text, prompts }) => {
-        if (type === 'message') {
-          if (error) {
-            setResponseText('No match');
-            await outputAdapter.speakResponse(`Sorry, I don't understand`);
-          } else if (text) {
-            setResponseText(text);
-            await outputAdapter.speakResponse(text);
-          }
-        } else {
-          setPrompts(prompts);
+          inputAdapter.onInterim.attach(setInterim);
+          inputAdapter.onResult.attach(async result => setSpeechResultText(result));
+          inputAdapter.onListening.attach(listening => {
+            if (listening) {
+              setSpeechResultText('');
+            }
+            setResponseText('')
+          })
+
+          outputAdapter = new SpeechOutputAdapter();
+          outputAdapter.onSpeaking.attach(setSpeechResult);
+
+          setSpeechInputAdapter(inputAdapter);
+          setSpeechOutputAdapter(outputAdapter);
         }
-      })
 
-      client.onConnected.attach(() => setConnectionStatus('connected'));
+        client.onMessage.attach(async ({ type, error, text, prompts }) => {
+          if (type === 'message') {
+            if (error) {
+              setResponseText(`Sorry, I don't understand`);
+              await outputAdapter?.speakResponse(`Sorry, I don't understand`);
+            } else if (text) {
+              setResponseText(text);
+              await outputAdapter?.speakResponse(text);
+            }
+          } else {
+            setPrompts(prompts);
+          }
+        })
 
-      client.onClose.attach(() => setConnectionStatus('reconnecting'));
+        client.onConnected.attach(() => setConnectionStatus('connected'));
 
-      client.connect();
+        client.onClose.attach(() => setConnectionStatus('reconnecting'));
+
+        client.connect();
+      }
+    } else {
+
     }
-  }, [])
+  }, [selectedServerName])
 
   return (
     <div>
@@ -77,29 +112,38 @@ const App: React.FC = () => {
 
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
+        <Settings
+          selectedServer={selectedServerName}
+          knownServers={knownServers}
+          onSelectServer={setSelectedServerName}
+        />
 
-        {(!!speechInputAdapter && !!speechOutputAdapter) && (
-          <Container maxWidth="sm">
-            <div style={{ height: 'calc(100vh - 200px)', padding: 20 }}>
-              <Logo />
-              <Results speechInputAdapter={speechInputAdapter} responseText={responseText} />
-            </div>
+        <Container maxWidth="sm">
+          <div style={{ height: 'calc(100vh - 200px)', padding: 20 }}>
+            <Logo />
+            {(!!speechInputAdapter && !!speechOutputAdapter) && (
+              <Results
+                interim={interim}
+                speechResultText={speechResultText}
+                responseText={responseText}
+              />
+            )}
+          </div>
 
-            <ListenButton
-              disconnected={connectionStatus !== 'connected'}
-              speaking={!!speechResult}
-              onCancel={() => {
-                speechResult?.cancel();
-                setSpeechResult(undefined);
-              }}
-              prompts={prompts}
-              speechInputAdapter={speechInputAdapter}
-            />
+          <ListenButton
+            disconnected={connectionStatus !== 'connected'}
+            listening={listening}
+            onStart={() => speechInputAdapter?.startRecognition()}
+            speaking={!!speechResult}
+            onCancel={() => {
+              speechResult?.cancel();
+              setSpeechResult(undefined);
+            }}
+            prompts={prompts}
+          />
+        </Container>
 
-          </Container>
-        )}
-
-        <ConnectionStatusDisplay status={connectionStatus} />
+        <ConnectionStatusDisplay serverName={selectedServerName} status={connectionStatus} />
       </ThemeProvider>
     </div>
   );

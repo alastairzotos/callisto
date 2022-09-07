@@ -1,11 +1,6 @@
 import { CircularProgress, Typography, keyframes, styled } from '@mui/material';
 import React from 'react';
-import { ConnectionStatus } from '../models';
-
-interface Props {
-  status: ConnectionStatus;
-  serverName?: string;
-}
+import { useCallisto } from '../state';
 
 const fadeInAndOut = keyframes`
   0%,100% { opacity: 0 }
@@ -26,18 +21,20 @@ const SuccessIndicator = styled('span')(() => ({
   animation: `${fadeInAndOut} 4s linear infinite`,
 }))
 
-export const ConnectionStatusDisplay: React.FC<Props> = ({ serverName, status }) => {
+export const ConnectionStatusDisplay: React.FC = () => {
+  const { selectedServerName, connectionStatus } = useCallisto();
+  
   return (
     <Wrapper>
       {
-        !serverName
+        !selectedServerName
           ? 'No server selected'
           : (
-            status === 'connecting'
-              ? <Typography variant='subtitle2'>Connecting to {serverName} server...</Typography>
+            connectionStatus === 'connecting'
+              ? <Typography variant='subtitle2'>Connecting to {selectedServerName} server...</Typography>
               : (
-                status === 'connected'
-                  ? <Typography variant='subtitle2'><SuccessIndicator>&#9679;</SuccessIndicator> Connected to server: {serverName}</Typography>
+                connectionStatus === 'connected'
+                  ? <Typography variant='subtitle2'><SuccessIndicator>&#9679;</SuccessIndicator> Connected to server: {selectedServerName}</Typography>
                   : <Typography variant='subtitle2' color='error'><CircularProgress size={10} /> Connection lost. Retrying..</Typography>
               )
           )

@@ -1,18 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Button, styled } from '@mui/material';
-import { SpeechInputAdapter } from '@bitmetro/callisto';
 
 import { Prompts } from './prompts';
-
-interface Props {
-  disconnected: boolean;
-  listening: boolean;
-  onStart: () => void;
-  speaking: boolean;
-  onCancel: () => void;
-  prompts: string[];
-  // speechInputAdapter: SpeechInputAdapter;
-}
+import { useCallisto, useSpeech } from '../state';
 
 const StyledButton = styled(Button)(() => ({
   borderRadius: 50,
@@ -21,19 +11,25 @@ const StyledButton = styled(Button)(() => ({
   maxHeight: 64
 }))
 
-export const ListenButton: React.FC<Props> = ({ disconnected, listening, onStart, speaking, onCancel, prompts }) => {
-  // const [listening, setListening] = useState(false);
+export const ListenButton: React.FC = () => {
+  const { connectionStatus, prompts } = useCallisto();
 
-  // useEffect(() => {
-  //   speechInputAdapter.onListening.attach(setListening);
-  // }, []);
+  const {
+    listening,
+    speechResult,
+    input,
+    cancelSpeech,
+  } = useSpeech();
+
+  const speaking = !!speechResult;
+
+  const disconnected = connectionStatus !== 'connected';
 
   const handleClick = () => {
     if (speaking) {
-      onCancel();
+      cancelSpeech();
     } else {
-      // speechInputAdapter.startRecognition();
-      onStart();
+      input?.startRecognition();
     }
   }
 

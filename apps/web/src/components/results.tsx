@@ -1,12 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Typography, styled } from '@mui/material';
-import { SpeechInputAdapter } from '@bitmetro/callisto';
-
-interface Props {
-  interim: string;
-  speechResultText: string;
-  responseText: string;
-}
+import { useCallisto } from '../state';
 
 const Wrapper = styled('div')(() => ({
   paddingTop: 100,
@@ -28,13 +22,19 @@ const InputWrapper = styled('div')(() => ({
 const firstUppercase = (text: string) =>
   (text && text.length) ? text[0].toLocaleUpperCase() + text.slice(1) : ''
 
-export const Results: React.FC<Props> = ({ interim, speechResultText, responseText }) => {
+export const Results: React.FC = () => {
+  const {
+    interimText,
+    speechResultText,
+    responseText,
+  } = useCallisto();
+
   return (
     <Wrapper>
-      {(speechResultText || interim) && (
+      {(speechResultText || interimText) && (
         <InputWrapper>
           <Bubble type='input'>
-            <Typography>{firstUppercase(speechResultText || interim)}</Typography>
+            <Typography>{firstUppercase(speechResultText || interimText)}</Typography>
           </Bubble>
         </InputWrapper>
       )}

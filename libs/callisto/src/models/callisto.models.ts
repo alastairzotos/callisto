@@ -10,6 +10,7 @@ export interface InteractionResponse {
 export type InteractionHandler = (args: string[]) => Promise<InteractionResponse | string>;
 
 export interface Interaction {
+  pluginId: string;
   regex: RegExp;
   handler: InteractionHandler;
 }
@@ -26,7 +27,8 @@ export interface CallistoResponse {
   type: CallistoResponseType;
   error: boolean;
   text?: string;
-  prompts: string[];
+  prompts?: string[];
+  progress?: number;
 }
 
 export type CallistoPlugin = (ctx: CallistoContext) => void;

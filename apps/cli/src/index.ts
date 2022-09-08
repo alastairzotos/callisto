@@ -30,7 +30,7 @@ client.onMessage.attach(({ type, error, text, prompts }) => {
       console.log(`[${chalk.blueBright('Callisto')}]: ${chalk.gray(text)}`);
     }
   } else if (type === 'prompts') {
-    prompts.forEach(prompt => {
+    prompts?.forEach(prompt => {
       console.log(`[${chalk.blueBright('Callisto')}]: ${chalk.gray(prompt)}`);
     })
   }

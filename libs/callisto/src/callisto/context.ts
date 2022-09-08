@@ -33,23 +33,28 @@ export class CallistoContext {
     return { error: true }
   }
 
-  addInteraction(regex: string | string[], handler: InteractionHandler) {
+  addInteraction(pluginId: string, regex: string | string[], handler: InteractionHandler) {
     if (typeof regex === 'string') {
       this.interactions.push({
+        pluginId,
         regex: new RegExp(`^${regex}$`, 'i'),
         handler
       });
     } else {
-      regex.forEach(r => this.addInteraction(r, handler));
+      regex.forEach(r => this.addInteraction(pluginId, r, handler));
     }
 
     return this;
   }
 
-  addInteractions(interactions: { [regex: string]: InteractionHandler }) {
-    Object.keys(interactions).forEach(regex => this.addInteraction(regex, interactions[regex]));
+  addInteractions(pluginId: string, interactions: { [regex: string]: InteractionHandler }) {
+    Object.keys(interactions).forEach(regex => this.addInteraction(pluginId, regex, interactions[regex]));
 
     return this;
+  }
+
+  removeInteractions(pluginId) {
+    this.interactions = this.interactions.filter(interaction => interaction.pluginId !== pluginId);
   }
 
   addPrompts(promps: string[]) {

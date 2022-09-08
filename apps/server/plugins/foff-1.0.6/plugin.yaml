@@ -1,0 +1,8 @@
+resolve: ./dist/index.js
+interactions:
+  - id: f-off
+    inputs:
+      - tell (.+) to f\*\*\* off
+      - tell (.+) to fuck off
+      - tell (.+) to go fuck (himself|herself|itself)
+      - tell (.+) to go f\*\*\* (himself|herself|itself)

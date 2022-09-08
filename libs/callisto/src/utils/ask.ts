@@ -10,7 +10,7 @@ export const ask = (
 ): InteractionResponse => {
   return {
     responseText: question,
-    context: ctx.addInteraction('(.*)', async ([response]) => {
+    context: ctx.addInteraction('__core__', '(.*)', async ([response]) => {
       const res = simplifyInteractionResponse(await onResponse(response));
 
       return {

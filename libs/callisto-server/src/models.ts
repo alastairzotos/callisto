@@ -1,3 +1,5 @@
+import { Callisto } from '@bitmetro/callisto';
+import { ChildProcess } from 'child_process';
 import * as z from 'zod';
 
 export const PluginInteractionSchema: z.ZodType<PluginInteraction> = z.lazy(() => z.object({
@@ -24,4 +26,18 @@ export interface PluginInteraction {
   inputs: string[];
   children?: PluginInteraction[];
   goToParentContextOnceFinished?: boolean;
+}
+
+export type PluginProcesses = { [pluginName: string]: ChildProcess | undefined };
+
+export interface Instance {
+  callisto: Callisto;
+  processes: PluginProcesses;
+}
+
+export interface ManifestItem {
+  name: string;
+  version: [number, number, number];
+  source: string;
+  pluginFile: string;
 }

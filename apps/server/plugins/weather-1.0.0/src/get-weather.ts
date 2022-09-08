@@ -1,6 +1,8 @@
 import { env } from './env';
 import fetch from 'node-fetch';
 
+const upperCaseWord = (word: string) => word.length === 0 ? '' : word[0].toLocaleUpperCase() + word.slice(1).toLocaleLowerCase();
+
 export const getWeather = async (time: string, location: string): Promise<string> => {
   const uri = generateUri(time, location);
 
@@ -11,7 +13,7 @@ export const getWeather = async (time: string, location: string): Promise<string
     const res = await fetch(uri);
     const data = await res.json();
 
-    return `${time} in ${location}: ${data.current.temp_c}°C, ${data.current.condition.text}`;
+    return `${upperCaseWord(time)} in ${upperCaseWord(location)}: ${data.current.temp_c}°C, ${data.current.condition.text}`;
 }
 
 const generateUri = (time: string, location: string): string | undefined => {

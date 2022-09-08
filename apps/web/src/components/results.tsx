@@ -3,14 +3,14 @@ import { Typography, styled } from '@mui/material';
 import { useCallisto } from '../state';
 
 const Wrapper = styled('div')(() => ({
-  paddingTop: 100,
+  paddingTop: 60,
 }))
 
 const Bubble = styled('div')<{ type: 'input' | 'response' }>(({ type, theme }) => ({
   backgroundColor: type === 'input' ? theme.palette.grey[800] : theme.palette.primary.dark,
   padding: theme.spacing(1, 2),
   marginBottom: theme.spacing(2),
-  maxWidth: '65%',
+  maxWidth: '75%',
   borderRadius: 20
 }))
 

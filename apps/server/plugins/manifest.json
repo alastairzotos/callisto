@@ -1,4 +1,14 @@
 {
+  "jokes": {
+    "name": "jokes",
+    "version": [
+      1,
+      0,
+      0
+    ],
+    "pluginFile": "jokes-1.0.0/plugin.yaml",
+    "source": ""
+  },
   "random-number": {
     "name": "random-number",
     "version": [

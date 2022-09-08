@@ -37,7 +37,7 @@ export interface Instance {
 
 export interface ManifestItem {
   name: string;
-  version: [number, number, number];
+  version: string;
   source: string;
   pluginFile: string;
 }

@@ -1,41 +1,25 @@
 {
   "jokes": {
     "name": "jokes",
-    "version": [
-      1,
-      0,
-      0
-    ],
+    "version": "1.0.0",
     "pluginFile": "jokes-1.0.0/plugin.yaml",
     "source": ""
   },
   "random-number": {
     "name": "random-number",
-    "version": [
-      1,
-      0,
-      0
-    ],
+    "version": "1.0.0",
     "pluginFile": "random-number-1.0.0/plugin.yaml",
     "source": ""
   },
   "weather": {
     "name": "weather",
-    "version": [
-      1,
-      0,
-      0
-    ],
+    "version": "1.0.0",
     "pluginFile": "weather-1.0.0/plugin.yaml",
     "source": ""
   },
   "wikipedia": {
     "name": "wikipedia",
-    "version": [
-      1,
-      0,
-      0
-    ],
+    "version": "1.0.0",
     "pluginFile": "wikipedia-1.0.0/plugin.yaml",
     "source": ""
   }

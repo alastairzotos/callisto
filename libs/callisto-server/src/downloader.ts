@@ -11,7 +11,7 @@ export type DownloadRejectionReason = 'not-found' | 'bad-format' | 'other';
 interface NameValidation {
   name: string;
   ext: string;
-  version: [number, number, number];
+  version: string;
 }
 
 export class Downloader {
@@ -79,10 +79,9 @@ export class Downloader {
       return false;
     }
     
-    const versionString = parts.pop();
+    const version = parts.pop()!;
     
-    const version = this.validateVersion(versionString!);
-    if (!version) {
+    if (!this.validateVersion(version!)) {
       return false;
     }
     

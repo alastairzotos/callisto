@@ -109,13 +109,16 @@ export class PluginManager {
     Object.keys(this.callistoInstances)
       .forEach(handle => {
         this.applyPluginsToInstance(handle);
-
-        this.ws?.send(JSON.stringify({
-          type: 'prompts',
-          error: false,
-          prompts: this.callistoInstances[handle].callisto.getContextChain().map(ctx => ctx.getPrompts()).flat(),
-        } as CallistoResponse))
+        this.sendPluginInfo(this.callistoInstances[handle].callisto);
       });
+  }
+
+  sendPluginInfo(callisto: Callisto) {
+    this.ws?.send(JSON.stringify({
+      type: 'prompts',
+      error: false,
+      prompts: callisto.getContextChain().map(ctx => ctx.getPrompts()).flat(),
+    } as CallistoResponse))
   }
 
   applyPluginsToInstance(handle: string) {
@@ -207,6 +210,8 @@ export class PluginManager {
         this.callistoInstances[handle].processes[name] = process;
         this.logger.log(`Created processes ${chalk.gray(process.pid)}`, handle);
       }
+
+      this.sendPluginInfo(this.callistoInstances[handle].callisto);
     })
   }
 

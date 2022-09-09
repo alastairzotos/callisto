@@ -71,11 +71,7 @@ export class CallistoServer {
         delete this.instances[handle];
       })
 
-      ws.send(JSON.stringify({
-        type: 'prompts',
-        error: false,
-        prompts: callisto.getContextChain().map(ctx => ctx.getPrompts()).flat(),
-      } as CallistoResponse))
+      this.pluginManager.sendPluginInfo(callisto);
     })
 
     this.logger.log(`Callisto server running on ${chalk.gray(`ws://localhost:${port}`)}`);

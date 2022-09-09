@@ -19,7 +19,7 @@ export const PluginSettings: React.FC<Props> = ({ open, onClose }) => {
     <BasicModal title="Plugins" open={open} onClose={onClose}>
       {(!registry && !managingRegistry) && (
         <>
-          <Typography>You don't have a plugin registry set</Typography>
+          <Typography>You don&apos;t have a plugin registry set</Typography>
           <Button onClick={() => setManagingRegistry(true)}>Set registry</Button>
         </>
       )}

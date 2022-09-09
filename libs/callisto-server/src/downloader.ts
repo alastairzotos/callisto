@@ -4,9 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Logger } from 'logger';
 import * as extract from 'extract-zip';
-import { ManifestItem } from 'models';
-
-export type DownloadRejectionReason = 'not-found' | 'bad-format' | 'other';
+import { ManifestItem, DownloadRejectionReason } from './models';
 
 interface NameValidation {
   name: string;

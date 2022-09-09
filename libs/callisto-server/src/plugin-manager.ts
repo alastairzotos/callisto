@@ -6,11 +6,12 @@ import { execSync, fork, ChildProcess } from 'child_process';
 import * as chalk from 'chalk';
 import { Express } from 'express';
 import * as ws from 'ws';
+import * as rimraf from 'rimraf';
 
 import { sendAnswer, sendCommand } from './ipc';
-import { Instance, PluginImport, PluginImportSchema, PluginInteraction, PluginProcesses } from './models';
+import { Instance, PluginImport, PluginImportSchema, PluginInteraction, PluginProcesses, DownloadRejectionReason, UninstallRejectionReason } from './models';
 import { Logger } from './logger';
-import { Downloader, DownloadRejectionReason } from './downloader';
+import { Downloader } from './downloader';
 import { ManifestManager } from './manifest';
 import { extractName } from './utils';
 
@@ -43,7 +44,17 @@ export class PluginManager {
   }
 
   setupEndpoints(app: Express) {
-    app.get('/download', async (req, res) => {
+    app.get('/plugins', (_, res) => {
+      res.json(this.manifestManager.readManifest());
+    });
+
+    app.get('/prune', async (_, res) => {
+      await this.prunePlugins();
+
+      res.send('System pruned');
+    })
+
+    app.get('/plugin/install', async (req, res) => {
       try {
         await this.downloadPlugin(req.query.url as string);
         
@@ -59,6 +70,69 @@ export class PluginManager {
         }
       }
     })
+
+    app.get('/plugin/uninstall', async (req, res) => {
+      try {
+        await this.uninstallPlugin(req.query.name as string);
+
+        res.send('Uninstalled ' + req.query.name);
+      } catch (e) {
+        const reason = e as UninstallRejectionReason;
+
+        if (reason === 'no-plugin') {
+          res.status(404).send(`No plugin named ${req.query.name} is installed`)
+        }
+      }
+    });
+  }
+
+  private async prunePlugins() {
+    this.logger.log('Pruning stale plugins...');
+
+    const manifest = this.manifestManager.readManifest();
+    const pluginFoldersInManifest = Object.values(manifest).map(({ name, version }) => `${name}-${version}`);
+
+    const pluginFolders = fs.readdirSync(this.pluginsDir);
+
+    const excessPlugins = pluginFolders
+      .filter(file => file !== 'manifest.json')
+      .filter(folder => !pluginFoldersInManifest.find(m => m === folder));
+
+    for (let handle of Object.keys(this.callistoInstances)) {
+      for (let excessPlugin of excessPlugins) {
+        const pluginName = excessPlugin.split('-')[0];
+
+        const staleProcess = this.callistoInstances[handle].processes[pluginName];
+
+        if (staleProcess) {
+          this.logger.log(`Killing process ${chalk.gray(staleProcess.pid)}`, handle);
+          staleProcess.kill();
+          this.callistoInstances[handle].callisto.getRootContext().removeInteractions(pluginName);
+          delete this.callistoInstances[handle].processes[pluginName];
+        }
+      }
+    }
+
+    this.logger.log(`Removing ${pluginFolders.map(folder => chalk.gray(folder)).join(', ')}`)
+    excessPlugins.forEach(pluginFolder => {
+      rimraf.sync(path.resolve(this.pluginsDir, pluginFolder));
+    })
+
+    this.logger.log('System pruned');
+  }
+
+  private async uninstallPlugin(name: string) {
+    this.logger.log(`Uninstalling plugin ${name}...`)
+    const manifest = this.manifestManager.readManifest();
+
+    const manifestPlugin = manifest[name];
+
+    if (!manifestPlugin) {
+      throw 'no-plugin' as UninstallRejectionReason;
+    }
+
+    this.manifestManager.removeFromManifest(name);
+    await this.prunePlugins();
   }
 
   private async downloadPlugin(url: string) {

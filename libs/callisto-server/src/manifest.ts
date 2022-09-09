@@ -29,4 +29,10 @@ export class ManifestManager {
     const newManifestData = { ...current, ...update };
     fs.writeFileSync(this.manifestFile, JSON.stringify(newManifestData, null, 2));
   }
+
+  removeFromManifest(key: string) {
+    const manifest = this.readManifest();
+    delete manifest[key];
+    fs.writeFileSync(this.manifestFile, JSON.stringify(manifest, null, 2));
+  }
 }

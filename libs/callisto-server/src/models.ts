@@ -41,3 +41,7 @@ export interface ManifestItem {
   source: string;
   pluginFile: string;
 }
+
+export type DownloadRejectionReason = 'not-found' | 'bad-format' | 'other';
+
+export type UninstallRejectionReason = 'no-plugin';

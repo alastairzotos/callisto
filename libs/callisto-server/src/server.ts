@@ -86,6 +86,13 @@ export class CallistoServer {
   }
 
   private createHandle() {
-    return `${ Math.round(Math.random() * 9999) + 1 }`;
+    const createRandomNumber = () => `${ Math.round(Math.random() * 99999) + 1 }`;
+
+    let handle = createRandomNumber();
+    while (!!this.instances[handle]) {
+      handle = createRandomNumber();
+    }
+
+    return handle;
   }
 }

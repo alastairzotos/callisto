@@ -5,7 +5,6 @@ import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { styled } from '@mui/material';
 import { ServerSettings } from './server-settings';
-import { PluginSettings } from './plugn-settings';
 
 const Wrapper = styled('div')(({ theme }) => ({
   margin: theme.spacing(2, 2, -2, 0),
@@ -16,7 +15,6 @@ const Wrapper = styled('div')(({ theme }) => ({
 export const Settings: React.FC = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectServerModalOpen, setSelectServerModalOpen] = useState(false);
-  const [pluginsModalOpen, setPluginsModalOpen] = useState(false);
 
   return (
     <>
@@ -43,14 +41,6 @@ export const Settings: React.FC = () => {
           >
             Select server
           </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setAnchorEl(null);
-              setPluginsModalOpen(true);
-            }}
-          >
-            Plugins
-          </MenuItem>
         </Menu>
       </Wrapper>
       
@@ -58,12 +48,6 @@ export const Settings: React.FC = () => {
         open={selectServerModalOpen}
         onClose={() => setSelectServerModalOpen(false)}
       />
-
-      <PluginSettings
-        open={pluginsModalOpen}
-        onClose={() => setPluginsModalOpen(false)}
-      />
-     
     </>
   )
 }

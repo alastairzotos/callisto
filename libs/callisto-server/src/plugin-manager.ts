@@ -86,6 +86,21 @@ export class PluginManager {
     });
   }
 
+  importPlugins() {
+    const manifest = this.manifestManager.readManifest();
+
+    Object.keys(manifest)
+      .forEach(pluginId => this.importPlugin(path.resolve(this.pluginsDir, manifest[pluginId].pluginFile)))
+  }
+
+  applyPlugins(callisto: Callisto) {
+    return this.plugins
+      .reduce<PluginProcesses>((acc, plugin) => ({
+        ...acc,
+        [plugin.name]: this.applyPlugin(callisto, plugin)
+      }), {})
+  }
+
   private async prunePlugins() {
     this.logger.log('Pruning stale plugins...');
 
@@ -157,21 +172,6 @@ export class PluginManager {
         this.logger.log(`Created processes ${chalk.gray(process.pid)}`, handle);
       }
     })
-  }
-
-  importPlugins() {
-    const manifest = this.manifestManager.readManifest();
-
-    Object.keys(manifest)
-      .forEach(pluginId => this.importPlugin(path.resolve(this.pluginsDir, manifest[pluginId].pluginFile)))
-  }
-
-  applyPlugins(callisto: Callisto) {
-    return this.plugins
-      .reduce<PluginProcesses>((acc, plugin) => ({
-        ...acc,
-        [plugin.name]: this.applyPlugin(callisto, plugin)
-      }), {})
   }
 
   private importPlugin(pluginFile: string) {

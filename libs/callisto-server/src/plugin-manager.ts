@@ -1,4 +1,4 @@
-import { ask, Callisto, CallistoContext } from '@bitmetro/callisto';
+import { ask, Callisto, CallistoContext, CallistoResponse } from '@bitmetro/callisto';
 import * as path from 'path';
 import * as fs from 'fs';
 import { parse as parseYaml } from 'yaml';
@@ -107,7 +107,15 @@ export class PluginManager {
     )
 
     Object.keys(this.callistoInstances)
-      .forEach(handle => this.applyPluginsToInstance(handle));
+      .forEach(handle => {
+        this.applyPluginsToInstance(handle);
+
+        this.ws?.send(JSON.stringify({
+          type: 'prompts',
+          error: false,
+          prompts: this.callistoInstances[handle].callisto.getContextChain().map(ctx => ctx.getPrompts()).flat(),
+        } as CallistoResponse))
+      });
   }
 
   applyPluginsToInstance(handle: string) {

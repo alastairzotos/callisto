@@ -46,11 +46,7 @@ export class CallistoServer {
       };
 
       this.pluginManager.ws = ws;
-      const processes = this.pluginManager.applyPlugins(callisto);
-
-      this.instances[handle].processes = processes;
-
-      this.logger.log(`Created processes ${Object.values(processes).map(p => chalk.gray(p?.pid)).join(', ')}`, handle);
+      this.pluginManager.applyPluginsToInstance(handle);
 
       ws.on('message', async msg => {
         this.logger.log(`Received message: ${chalk.gray(msg)}`, handle);

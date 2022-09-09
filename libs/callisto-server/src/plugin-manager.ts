@@ -2,18 +2,30 @@ import { ask, Callisto, CallistoContext } from '@bitmetro/callisto';
 import * as path from 'path';
 import * as fs from 'fs';
 import { parse as parseYaml } from 'yaml';
-import { execSync, fork, ChildProcess } from 'child_process';
+import { exec, fork, ChildProcess } from 'child_process';
 import * as chalk from 'chalk';
 import { Express } from 'express';
 import * as ws from 'ws';
 import * as rimraf from 'rimraf';
 
 import { sendAnswer, sendCommand } from './ipc';
-import { Instance, PluginImport, PluginImportSchema, PluginInteraction, PluginProcesses, DownloadRejectionReason, UninstallRejectionReason } from './models';
+import { Instance, PluginImport, PluginImportSchema, PluginInteraction, DownloadRejectionReason, UninstallRejectionReason } from './models';
 import { Logger } from './logger';
 import { Downloader } from './downloader';
 import { ManifestManager } from './manifest';
 import { extractName } from './utils';
+
+const execAsync = (cmd: string, cwd: string) => new Promise<void>((resolve, reject) => {
+  exec(cmd, { cwd }, (err, stdout, stderr) => {
+    if (err) {
+      console.error(stderr);
+      return reject(err);
+    }
+
+    console.log(stdout);
+    resolve();
+  })
+})
 
 export interface PluginRef {
   name: string;
@@ -25,7 +37,7 @@ export interface PluginRef {
 
 export class PluginManager {
   ws: ws.WebSocket | undefined;
-  
+
   private pluginsDir: string = __dirname;
   private plugins: PluginRef[] = [];
   private downloader: Downloader;
@@ -57,7 +69,7 @@ export class PluginManager {
     app.get('/plugin/install', async (req, res) => {
       try {
         await this.downloadPlugin(req.query.url as string);
-        
+
         res.send('Downloaded ' + req.query.url);
       } catch (e) {
         const reason = e as DownloadRejectionReason;
@@ -86,19 +98,35 @@ export class PluginManager {
     });
   }
 
-  importPlugins() {
+  async importPlugins() {
     const manifest = this.manifestManager.readManifest();
 
-    Object.keys(manifest)
-      .forEach(pluginId => this.importPlugin(path.resolve(this.pluginsDir, manifest[pluginId].pluginFile)))
+    await Promise.all(
+      Object.keys(manifest)
+        .map(pluginId => this.importPlugin(path.resolve(this.pluginsDir, manifest[pluginId].pluginFile)))
+    )
+
+    Object.keys(this.callistoInstances)
+      .forEach(handle => this.applyPluginsToInstance(handle));
   }
 
-  applyPlugins(callisto: Callisto) {
-    return this.plugins
-      .reduce<PluginProcesses>((acc, plugin) => ({
-        ...acc,
-        [plugin.name]: this.applyPlugin(callisto, plugin)
-      }), {})
+  applyPluginsToInstance(handle: string) {
+    const instance = this.callistoInstances[handle];
+    if (!instance) {
+      return;
+    }
+
+    let processes: ChildProcess[] = [];
+
+    for (let plugin of this.plugins) {
+      if (!instance.processes[plugin.name]) {
+        const process = this.applyPlugin(instance.callisto, plugin);;
+        instance.processes[plugin.name] = process;
+        processes.push(process!);
+      }
+    }
+
+    this.logger.log(`Created processes ${Object.values(processes).map(p => chalk.gray(p?.pid)).join(', ')}`, handle);
   }
 
   private async prunePlugins() {
@@ -152,7 +180,7 @@ export class PluginManager {
 
   private async downloadPlugin(url: string) {
     const { name, version, pluginFile, source } = await this.downloader.downloadPlugin(url as string, this.pluginsDir);
-    const plugin = this.importPlugin(pluginFile);
+    const plugin = await this.importPlugin(pluginFile);
 
     this.manifestManager.updateManifest({
       [name]: { name, version, pluginFile: path.relative(this.pluginsDir, pluginFile), source }
@@ -174,7 +202,7 @@ export class PluginManager {
     })
   }
 
-  private importPlugin(pluginFile: string) {
+  private async importPlugin(pluginFile: string) {
     const pluginPath = path.dirname(pluginFile);
     const pluginFileContent = fs.readFileSync(pluginFile).toString();
     const fullName = path.basename(pluginPath);
@@ -191,13 +219,13 @@ export class PluginManager {
       const { resolve, interactions } = PluginImportSchema.parse(config) as PluginImport;
 
       this.logger.log('Installing dependencies', fullName);
-      execSync('npm i', { cwd: pluginPath, stdio: 'inherit' });
+      await execAsync('npm i', pluginPath);
 
       if (fs.existsSync(path.resolve(pluginPath, config.resolve))) {
         this.logger.log('Already built. Skipping...', fullName)
       } else {
         this.logger.log('Building', fullName);
-        execSync('npm run build', { cwd: pluginPath, stdio: 'inherit' });
+        await execAsync('npm run build', pluginPath);
       }
 
       const newPlugin: PluginRef = { name: extractName(fullName), fullName, resolve, pluginPath, interactions };

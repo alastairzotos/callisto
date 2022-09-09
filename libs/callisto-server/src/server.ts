@@ -1,6 +1,7 @@
 import { Callisto, CallistoResponse } from '@bitmetro/callisto';
 import * as ws from 'ws';
 import * as express from 'express';
+import * as cors from 'cors';
 import * as chalk from 'chalk';
 
 import { Logger } from './logger';
@@ -25,6 +26,8 @@ export class CallistoServer {
     this.pluginManager.importPlugins();
 
     const app = express();
+
+    app.use(cors());
 
     app.get('/health', (_, res) => res.send('healthy'));
 

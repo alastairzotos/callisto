@@ -1,3 +1,5 @@
+# NOTE: Update callisto-manager/src/commands/plugin/templates/package.json.ts dependency version after running this
+
 publish-pckg:
 	npm version patch; \
 	npm publish --access=public; \

@@ -45,9 +45,9 @@ export class InstanceManager {
     const staleProcess = this.instances[handle].processes[pluginName];
 
     if (staleProcess) {
-      staleProcess.kill();
+      const pid = staleProcess.pid;
 
-      const pid = this.instances[handle].processes[pluginName]?.pid;
+      staleProcess.kill();
 
       this.get(handle).callisto.getRootContext().removeInteractions(pluginName);
       delete this.instances[handle].processes[pluginName];

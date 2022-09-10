@@ -14,10 +14,6 @@ export class InstanceManager {
     return this.instances[handle];
   }
 
-  // getHandles() {
-  //   return Object.keys(this.instances);
-  // }
-
   forEach(cb: (handle: string, instance: Instance) => void) {
     Object.keys(this.instances).forEach(handle => cb(handle, this.instances[handle]));
   }

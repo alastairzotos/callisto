@@ -1,4 +1,3 @@
-
 type ConstructorTypeOf<T> = new (...args:any[]) => T;
 
 export class Container {

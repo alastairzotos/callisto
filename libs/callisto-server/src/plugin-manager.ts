@@ -4,17 +4,17 @@ import * as fs from 'fs';
 import { parse as parseYaml } from 'yaml';
 import { fork, ChildProcess } from 'child_process';
 import * as chalk from 'chalk';
-import { Express } from 'express';
 import * as rimraf from 'rimraf';
 
 import { sendAnswer, sendCommand } from './ipc';
-import { PluginImport, PluginImportSchema, PluginInteraction, DownloadRejectionReason, UninstallRejectionReason, PluginRef } from './models';
+import { PluginImport, PluginInteraction, UninstallRejectionReason, PluginRef } from './models';
 import { Logger } from './logger';
 import { Downloader } from './downloader';
 import { ManifestManager } from './manifest';
 import { execAsync, extractName } from './utils';
 import { Container } from './container';
 import { InstanceManager } from './instance-manager';
+import { PluginImportSchema } from './schemas';
 
 export class PluginManager {
   private pluginsDir: string = __dirname;

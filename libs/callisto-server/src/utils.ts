@@ -1,6 +1,8 @@
 import * as path from 'path';
 import { exec } from 'child_process';
 
+export const createRandomNumber = (lower: number, upper: number) => `${Math.round(Math.random() * (upper - lower)) + lower}`;
+
 export const extractName = (url: string) => {
   const filename = path.basename(url);
   const parts = filename.split('-');

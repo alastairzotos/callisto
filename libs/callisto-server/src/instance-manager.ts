@@ -1,8 +1,10 @@
 import { Callisto } from "@bitmetro/callisto";
+import { ChildProcess } from 'child_process';
 
 import { Container } from "./container";
 import { Logger } from "./logger";
 import { Instance } from "./models";
+import { createRandomNumber } from "./utils";
 import { WebSocketHandler } from "./ws-handler";
 
 export class InstanceManager {
@@ -12,10 +14,6 @@ export class InstanceManager {
 
   get(handle: string) {
     return this.instances[handle];
-  }
-
-  forEach(cb: (handle: string, instance: Instance) => void) {
-    Object.keys(this.instances).forEach(handle => cb(handle, this.instances[handle]));
   }
 
   add(callisto: Callisto, ws: WebSocketHandler) {
@@ -30,8 +28,14 @@ export class InstanceManager {
     return handle;
   }
 
-  getProcessIds(handle: string) {
-    return Object.values(this.instances[handle].processes).map(p => p?.pid);
+  forEach(cb: (handle: string, instance: Instance) => void) {
+    Object.keys(this.instances).forEach(handle => cb(handle, this.instances[handle]));
+  }
+
+  mapProcesses(handle: string, cb: (name: string, process: ChildProcess | undefined, pid: number | undefined) => void) {
+    const instance = this.instances[handle];
+
+    return Object.keys(instance.processes).map(key => cb(key, instance.processes[key], instance.processes[key]?.pid));
   }
 
   kill(handle: string) {
@@ -72,11 +76,9 @@ export class InstanceManager {
   }
 
   private createHandle() {
-    const createRandomNumber = () => `${Math.round(Math.random() * 99999) + 1}`;
-
-    let handle = createRandomNumber();
+    let handle = createRandomNumber(1, 100000);
     while (!!this.instances[handle]) {
-      handle = createRandomNumber();
+      handle = createRandomNumber(1, 100000);
     }
 
     return handle;

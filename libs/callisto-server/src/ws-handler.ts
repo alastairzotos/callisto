@@ -20,20 +20,20 @@ export class WebSocketHandler {
       this.logger.log(`Received message: ${chalk.gray(msg)}`, handle);
 
       const { error, interactionResponse } = await callisto.handleInput(msg.toString());
-      this.sendMessage(interactionResponse?.responseText, error, callisto.getContextChain().map(ctx => ctx.getPrompts()).flat());
+      this.sendMessage(interactionResponse?.responseText, error);
     })
 
     this.webSocket.on('close', () => {
       this.logger.log(`Lost connection to ${chalk.yellow(handle)}`, handle);
 
-      this.logger.log(`Killing processes ${this.instanceManager.getProcessIds(handle).map(pid => chalk.gray(pid)).join(', ')}`, handle);
+      this.logger.log(`Killing processes ${this.instanceManager.mapProcesses(handle, (_n, _p, pid) => chalk.gray(pid)).join(', ')}`, handle);
 
       this.instanceManager.kill(handle);
     })
   }
 
-  sendMessage(text: string | undefined, error: boolean, prompts: string[]) {
-    this.webSocket.send(JSON.stringify({ type: 'message', error, text, prompts } as CallistoResponse));
+  sendMessage(text: string | undefined, error: boolean) {
+    this.webSocket.send(JSON.stringify({ type: 'message', text, error } as CallistoResponse));
   }
 
   sendPrompts(prompts: string[]) {

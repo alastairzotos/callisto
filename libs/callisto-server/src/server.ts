@@ -1,4 +1,4 @@
-import { Callisto, CallistoResponse } from '@bitmetro/callisto';
+import { Callisto } from '@bitmetro/callisto';
 import * as ws from 'ws';
 import * as express from 'express';
 import * as cors from 'cors';
@@ -6,85 +6,100 @@ import * as chalk from 'chalk';
 
 import { Logger } from './logger';
 import { PluginManager } from './plugin-manager';
-import { Instance } from './models';
+import { InstanceManager } from './instance-manager';
+import { Container } from './container';
+import { WebSocketHandler } from './ws-handler';
+import { ManifestManager } from './manifest';
+import { DownloadRejectionReason, UninstallRejectionReason } from './models';
+
+interface ServerOptions {
+  pluginsRoot: string;
+}
 
 export class CallistoServer {
   private wss: ws.WebSocketServer | undefined;
-  private logger = new Logger();
-  private instances: { [key: string]: Instance } = {};
-  private pluginManager = new PluginManager(this.logger, this.instances);
 
-  constructor(
-    private readonly options: {
-      pluginsRoot: string
-    }
-  ) {
+  private logger = Container.resolve(Logger);
+  private pluginManager = Container.resolve(PluginManager);
+  private instanceManager = Container.resolve(InstanceManager);
+  private manifestManager = Container.resolve(ManifestManager);
+
+  constructor(options: ServerOptions) {
     this.pluginManager.setPluginsDir(options.pluginsRoot);
+    this.manifestManager.setPluginsDir(options.pluginsRoot);
   }
 
   start(port = 8080) {
     this.pluginManager.importPlugins();
 
+    this.wss = new ws.WebSocketServer({ server: this.createExpressServer().listen(port) });
+
+    this.wss.on('connection', ws => {
+      const callisto = new Callisto();
+      const wsHandler = new WebSocketHandler(ws);
+
+      const handle = this.instanceManager.add(callisto, wsHandler);
+
+      this.logger.log(`Received connection. Setting handle to ${chalk.yellow(handle)}`, handle);
+
+      this.pluginManager.applyPluginsToInstance(handle);
+
+      wsHandler.setupListeners(handle);
+
+      this.pluginManager.sendPrompts(handle);
+    })
+
+    this.logger.log(`Callisto server running on ${chalk.gray(`ws://localhost:${port}`)}`);
+  }
+
+  createExpressServer() {
     const app = express();
 
     app.use(cors());
 
     app.get('/health', (_, res) => res.send('healthy'));
 
-    this.wss = new ws.WebSocketServer({ server: app.listen(port) });
+    app.get('/plugins', (_, res) => {
+      res.json(this.manifestManager.readManifest());
+    });
 
-    this.pluginManager.setupEndpoints(app);
+    app.get('/prune', async (_, res) => {
+      await this.pluginManager.prunePlugins();
 
-    this.wss.on('connection', ws => {
-      const handle = this.createHandle();
-      this.logger.log(`Received connection. Setting handle to ${chalk.yellow(handle)}`, handle);
-
-      const callisto = new Callisto();
-      this.instances[handle] = {
-        callisto,
-        processes: {}
-      };
-
-      this.pluginManager.ws = ws;
-      this.pluginManager.applyPluginsToInstance(handle);
-
-      ws.on('message', async msg => {
-        this.logger.log(`Received message: ${chalk.gray(msg)}`, handle);
-
-        const { error, interactionResponse } = await callisto.handleInput(msg.toString());
-        ws.send(JSON.stringify({
-          type: 'message',
-          error,
-          text: interactionResponse?.responseText,
-          prompts: callisto.getContextChain().map(ctx => ctx.getPrompts()).flat(),
-        } as CallistoResponse));
-      })
-
-      ws.on('close', () => {
-        this.logger.log(`Lost connection to ${chalk.yellow(handle)}`, handle);
-
-        this.logger.log(`Killing processes ${Object.values(this.instances[handle].processes).map(p => chalk.gray(p?.pid)).join(', ')}`, handle);
-
-        Object.values(this.instances[handle].processes)
-          .forEach(process => process?.kill());
-
-        delete this.instances[handle];
-      })
-
-      this.pluginManager.sendPluginInfo(callisto);
+      res.send('System pruned');
     })
 
-    this.logger.log(`Callisto server running on ${chalk.gray(`ws://localhost:${port}`)}`);
-  }
+    app.get('/plugin/install', async (req, res) => {
+      try {
+        await this.pluginManager.downloadPlugin(req.query.url as string);
 
-  private createHandle() {
-    const createRandomNumber = () => `${ Math.round(Math.random() * 99999) + 1 }`;
+        res.send('Downloaded ' + req.query.url);
+      } catch (e) {
+        const reason = e as DownloadRejectionReason;
+        if (reason === 'not-found') {
+          res.status(404).send(`Cannot file file "${req.query.url}"`);
+        } else if (reason === 'bad-format') {
+          res.status(400).send(`Invalid filename format. Must be "[name]-[major].[minor].[patch].zip"`)
+        } else {
+          res.sendStatus(500);
+        }
+      }
+    })
 
-    let handle = createRandomNumber();
-    while (!!this.instances[handle]) {
-      handle = createRandomNumber();
-    }
+    app.get('/plugin/uninstall', async (req, res) => {
+      try {
+        await this.pluginManager.uninstallPlugin(req.query.name as string);
 
-    return handle;
+        res.send('Uninstalled ' + req.query.name);
+      } catch (e) {
+        const reason = e as UninstallRejectionReason;
+
+        if (reason === 'no-plugin') {
+          res.status(404).send(`No plugin named ${req.query.name} is installed`)
+        }
+      }
+    });
+
+    return app;
   }
 }

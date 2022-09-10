@@ -1,101 +1,32 @@
-import { ask, Callisto, CallistoContext, CallistoResponse } from '@bitmetro/callisto';
+import { ask, Callisto, CallistoContext } from '@bitmetro/callisto';
 import * as path from 'path';
 import * as fs from 'fs';
 import { parse as parseYaml } from 'yaml';
-import { exec, fork, ChildProcess } from 'child_process';
+import { fork, ChildProcess } from 'child_process';
 import * as chalk from 'chalk';
 import { Express } from 'express';
-import * as ws from 'ws';
 import * as rimraf from 'rimraf';
 
 import { sendAnswer, sendCommand } from './ipc';
-import { Instance, PluginImport, PluginImportSchema, PluginInteraction, DownloadRejectionReason, UninstallRejectionReason } from './models';
+import { PluginImport, PluginImportSchema, PluginInteraction, DownloadRejectionReason, UninstallRejectionReason, PluginRef } from './models';
 import { Logger } from './logger';
 import { Downloader } from './downloader';
 import { ManifestManager } from './manifest';
-import { extractName } from './utils';
-
-const execAsync = (cmd: string, cwd: string) => new Promise<void>((resolve, reject) => {
-  exec(cmd, { cwd }, (err, stdout, stderr) => {
-    if (err) {
-      console.error(stderr);
-      return reject(err);
-    }
-
-    console.log(stdout);
-    resolve();
-  })
-})
-
-export interface PluginRef {
-  name: string;
-  fullName: string;
-  resolve: string;
-  pluginPath: string;
-  interactions: PluginInteraction[];
-}
+import { execAsync, extractName } from './utils';
+import { Container } from './container';
+import { InstanceManager } from './instance-manager';
 
 export class PluginManager {
-  ws: ws.WebSocket | undefined;
-
   private pluginsDir: string = __dirname;
   private plugins: PluginRef[] = [];
-  private downloader: Downloader;
-  private manifestManager = new ManifestManager();
 
-  constructor(
-    private logger: Logger,
-    private callistoInstances: { [key: string]: Instance }
-  ) {
-    this.downloader = new Downloader(logger);
-  }
+  private logger = Container.resolve(Logger);
+  private downloader = Container.resolve(Downloader);
+  private instanceManager = Container.resolve(InstanceManager);
+  private manifestManager = Container.resolve(ManifestManager);
 
   setPluginsDir(pluginsDir: string) {
     this.pluginsDir = pluginsDir;
-    this.manifestManager.setPluginsDir(pluginsDir);
-  }
-
-  setupEndpoints(app: Express) {
-    app.get('/plugins', (_, res) => {
-      res.json(this.manifestManager.readManifest());
-    });
-
-    app.get('/prune', async (_, res) => {
-      await this.prunePlugins();
-
-      res.send('System pruned');
-    })
-
-    app.get('/plugin/install', async (req, res) => {
-      try {
-        await this.downloadPlugin(req.query.url as string);
-
-        res.send('Downloaded ' + req.query.url);
-      } catch (e) {
-        const reason = e as DownloadRejectionReason;
-        if (reason === 'not-found') {
-          res.status(404).send(`Cannot file file "${req.query.url}"`);
-        } else if (reason === 'bad-format') {
-          res.status(400).send(`Invalid filename format. Must be "[name]-[major].[minor].[patch].zip"`)
-        } else {
-          res.sendStatus(500);
-        }
-      }
-    })
-
-    app.get('/plugin/uninstall', async (req, res) => {
-      try {
-        await this.uninstallPlugin(req.query.name as string);
-
-        res.send('Uninstalled ' + req.query.name);
-      } catch (e) {
-        const reason = e as UninstallRejectionReason;
-
-        if (reason === 'no-plugin') {
-          res.status(404).send(`No plugin named ${req.query.name} is installed`)
-        }
-      }
-    });
   }
 
   async importPlugins() {
@@ -106,28 +37,25 @@ export class PluginManager {
         .map(pluginId => this.importPlugin(path.resolve(this.pluginsDir, manifest[pluginId].pluginFile)))
     )
 
-    Object.keys(this.callistoInstances)
+    this.instanceManager
       .forEach(handle => {
         this.applyPluginsToInstance(handle);
-        this.sendPluginInfo(this.callistoInstances[handle].callisto);
+        this.sendPrompts(handle);
       });
   }
 
-  sendPluginInfo(callisto: Callisto) {
-    this.ws?.send(JSON.stringify({
-      type: 'prompts',
-      error: false,
-      prompts: callisto.getContextChain().map(ctx => ctx.getPrompts()).flat(),
-    } as CallistoResponse))
+  sendPrompts(handle: string) {
+    const instance = this.instanceManager.get(handle);
+    instance.ws.sendPrompts(instance.callisto.getContextChain().map(ctx => ctx.getPrompts()).flat());
   }
 
   applyPluginsToInstance(handle: string) {
-    const instance = this.callistoInstances[handle];
+    const instance = this.instanceManager.get(handle);
     if (!instance) {
       return;
     }
 
-    let processes: ChildProcess[] = [];
+    const processes: ChildProcess[] = [];
 
     for (let plugin of this.plugins) {
       if (!instance.processes[plugin.name]) {
@@ -140,7 +68,7 @@ export class PluginManager {
     this.logger.log(`Created processes ${Object.values(processes).map(p => chalk.gray(p?.pid)).join(', ')}`, handle);
   }
 
-  private async prunePlugins() {
+  async prunePlugins() {
     this.logger.log('Pruning stale plugins...');
 
     const manifest = this.manifestManager.readManifest();
@@ -152,30 +80,20 @@ export class PluginManager {
       .filter(file => file !== 'manifest.json')
       .filter(folder => !pluginFoldersInManifest.find(m => m === folder));
 
-    for (let handle of Object.keys(this.callistoInstances)) {
-      for (let excessPlugin of excessPlugins) {
-        const pluginName = excessPlugin.split('-')[0];
-
-        const staleProcess = this.callistoInstances[handle].processes[pluginName];
-
-        if (staleProcess) {
-          this.logger.log(`Killing process ${chalk.gray(staleProcess.pid)}`, handle);
-          staleProcess.kill();
-          this.callistoInstances[handle].callisto.getRootContext().removeInteractions(pluginName);
-          delete this.callistoInstances[handle].processes[pluginName];
-        }
-      }
-    }
-
     this.logger.log(`Removing ${pluginFolders.map(folder => chalk.gray(folder)).join(', ')}`)
-    excessPlugins.forEach(pluginFolder => {
-      rimraf.sync(path.resolve(this.pluginsDir, pluginFolder));
-    })
+
+    excessPlugins.forEach(pluginFolder => rimraf.sync(path.resolve(this.pluginsDir, pluginFolder)))
+
+    const killedProcessIds = this.instanceManager.killProcesses(excessPlugins.map(plugin => extractName(plugin)));
+
+    if (killedProcessIds.length) {
+      this.logger.log(`Killed processes ${chalk.gray(killedProcessIds.join(', '))}`);
+    }
 
     this.logger.log('System pruned');
   }
 
-  private async uninstallPlugin(name: string) {
+  async uninstallPlugin(name: string) {
     this.logger.log(`Uninstalling plugin ${name}...`)
     const manifest = this.manifestManager.readManifest();
 
@@ -189,7 +107,7 @@ export class PluginManager {
     await this.prunePlugins();
   }
 
-  private async downloadPlugin(url: string) {
+  async downloadPlugin(url: string) {
     const { name, version, pluginFile, source } = await this.downloader.downloadPlugin(url as string, this.pluginsDir);
     const plugin = await this.importPlugin(pluginFile);
 
@@ -197,22 +115,23 @@ export class PluginManager {
       [name]: { name, version, pluginFile: path.relative(this.pluginsDir, pluginFile), source }
     })
 
-    Object.keys(this.callistoInstances).forEach(handle => {
-      const process = this.applyPlugin(this.callistoInstances[handle].callisto, plugin);
+    this.instanceManager
+      .forEach((handle, instance) => {
+        const process = this.applyPlugin(instance.callisto, plugin);
 
-      if (process) {
-        const foundProcess = this.callistoInstances[handle].processes[name];
-        if (!!foundProcess) {
-          this.logger.log(`Killing process ${chalk.gray(foundProcess.pid)}`, handle);
-          foundProcess.kill();
+        if (process) {
+          const foundProcess = instance.processes[name];
+          if (!!foundProcess) {
+            this.logger.log(`Killing process ${chalk.gray(foundProcess.pid)}`, handle);
+            this.instanceManager.killProcess(handle, name);
+          }
+
+          instance.processes[name] = process;
+          this.logger.log(`Created processes ${chalk.gray(process.pid)}`, handle);
         }
 
-        this.callistoInstances[handle].processes[name] = process;
-        this.logger.log(`Created processes ${chalk.gray(process.pid)}`, handle);
-      }
-
-      this.sendPluginInfo(this.callistoInstances[handle].callisto);
-    })
+        this.sendPrompts(handle);
+      })
   }
 
   private async importPlugin(pluginFile: string) {

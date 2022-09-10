@@ -2,9 +2,11 @@ import * as http from 'http';
 import * as https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Logger } from 'logger';
 import * as extract from 'extract-zip';
+
+import { Logger } from './logger';
 import { ManifestItem, DownloadRejectionReason } from './models';
+import { Container } from './container';
 
 interface NameValidation {
   name: string;
@@ -13,7 +15,7 @@ interface NameValidation {
 }
 
 export class Downloader {
-  constructor(private logger: Logger) { }
+  private logger = Container.resolve(Logger);
 
   async downloadPlugin(url: string, destDir: string) {
     return new Promise<ManifestItem>((resolve, reject) => {

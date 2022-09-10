@@ -1,6 +1,7 @@
 import { Callisto } from '@bitmetro/callisto';
 import { ChildProcess } from 'child_process';
 import * as z from 'zod';
+import { WebSocketHandler } from './ws-handler';
 
 export const PluginInteractionSchema: z.ZodType<PluginInteraction> = z.lazy(() => z.object({
   id: z.string(),
@@ -33,6 +34,7 @@ export type PluginProcesses = { [pluginName: string]: ChildProcess | undefined }
 export interface Instance {
   callisto: Callisto;
   processes: PluginProcesses;
+  ws: WebSocketHandler;
 }
 
 export interface ManifestItem {
@@ -45,3 +47,11 @@ export interface ManifestItem {
 export type DownloadRejectionReason = 'not-found' | 'bad-format' | 'other';
 
 export type UninstallRejectionReason = 'no-plugin';
+
+export interface PluginRef {
+  name: string;
+  fullName: string;
+  resolve: string;
+  pluginPath: string;
+  interactions: PluginInteraction[];
+}

@@ -42,7 +42,7 @@ export class CallistoServer {
 
       this.logger.log(`Received connection. Setting handle to ${chalk.yellow(handle)}`, handle);
 
-      this.pluginManager.applyPluginsToInstance(handle);
+      this.pluginManager.applyAllPluginsToInstance(handle);
 
       wsHandler.setupListeners(handle);
 

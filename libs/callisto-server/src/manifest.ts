@@ -23,6 +23,10 @@ export class ManifestManager {
     return JSON.parse(content);
   }
 
+  getInstalledPlugins(): ManifestItem[] {
+    return Object.values(this.readManifest())
+  }
+
   updateManifest(update: Manifest) {
     const current = this.readManifest();
 

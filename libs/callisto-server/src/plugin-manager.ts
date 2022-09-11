@@ -7,7 +7,7 @@ import * as chalk from 'chalk';
 import * as rimraf from 'rimraf';
 
 import { sendAnswer, sendCommand } from './ipc';
-import { PluginImport, PluginInteraction, UninstallRejectionReason, PluginRef } from './models';
+import { PluginImport, PluginInteraction, UninstallRejectionReason, PluginRef, Instance } from './models';
 import { Logger } from './logger';
 import { Downloader } from './downloader';
 import { ManifestManager } from './manifest';
@@ -30,16 +30,14 @@ export class PluginManager {
   }
 
   async importPlugins() {
-    const manifest = this.manifestManager.readManifest();
-
     await Promise.all(
-      Object.keys(manifest)
-        .map(pluginId => this.importPlugin(path.resolve(this.pluginsDir, manifest[pluginId].pluginFile)))
+      this.manifestManager.getInstalledPlugins()
+        .map(({ pluginFile }) => this.importPlugin(path.resolve(this.pluginsDir, pluginFile)))
     )
 
     this.instanceManager
       .forEach(handle => {
-        this.applyPluginsToInstance(handle);
+        this.applyAllPluginsToInstance(handle);
         this.sendPrompts(handle);
       });
   }
@@ -49,7 +47,7 @@ export class PluginManager {
     instance.ws.sendPrompts(instance.callisto.getContextChain().map(ctx => ctx.getPrompts()).flat());
   }
 
-  applyPluginsToInstance(handle: string) {
+  applyAllPluginsToInstance(handle: string) {
     const instance = this.instanceManager.get(handle);
     if (!instance) {
       return;
@@ -59,8 +57,7 @@ export class PluginManager {
 
     for (let plugin of this.plugins) {
       if (!instance.processes[plugin.name]) {
-        const process = this.applyPlugin(instance.callisto, plugin);;
-        instance.processes[plugin.name] = process;
+        const process = this.applyPluginToInstance(instance, plugin);
         processes.push(process!);
       }
     }
@@ -71,8 +68,7 @@ export class PluginManager {
   async prunePlugins() {
     this.logger.log('Pruning stale plugins...');
 
-    const manifest = this.manifestManager.readManifest();
-    const pluginFoldersInManifest = Object.values(manifest).map(({ name, version }) => `${name}-${version}`);
+    const pluginFoldersInManifest = this.manifestManager.getInstalledPlugins().map(({ name, version }) => `${name}-${version}`);
 
     const pluginFolders = fs.readdirSync(this.pluginsDir);
 
@@ -117,16 +113,15 @@ export class PluginManager {
 
     this.instanceManager
       .forEach((handle, instance) => {
-        const process = this.applyPlugin(instance.callisto, plugin);
+        const foundProcess = instance.processes[name];
 
+        if (!!foundProcess) {
+          this.logger.log(`Killing process ${chalk.gray(foundProcess.pid)}`, handle);
+          this.instanceManager.killProcess(handle, name);
+        }
+
+        const process = this.applyPluginToInstance(instance, plugin);
         if (process) {
-          const foundProcess = instance.processes[name];
-          if (!!foundProcess) {
-            this.logger.log(`Killing process ${chalk.gray(foundProcess.pid)}`, handle);
-            this.instanceManager.killProcess(handle, name);
-          }
-
-          instance.processes[name] = process;
           this.logger.log(`Created processes ${chalk.gray(process.pid)}`, handle);
         }
 
@@ -171,14 +166,15 @@ export class PluginManager {
     }
   }
 
-  private applyPlugin(callisto: Callisto, plugin?: PluginRef) {
+  private applyPluginToInstance(instance: Instance, plugin?: PluginRef) {
     if (plugin) {
       const { name, resolve, pluginPath, interactions } = plugin;
       const process = fork(resolve, { cwd: pluginPath });
+      instance.processes[plugin.name] = process;
 
-      callisto.getRootContext().removeInteractions(name);
+      instance.callisto.getRootContext().removeInteractions(name);
 
-      this.addPluginInteractions(name, process!, callisto.getRootContext(), interactions, pluginPath);
+      this.addPluginInteractions(name, process!, instance.callisto.getRootContext(), interactions, pluginPath);
 
       return process;
     }

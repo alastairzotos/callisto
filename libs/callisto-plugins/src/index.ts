@@ -12,7 +12,6 @@ const startPlugin = () => {
 
     process.on('message', async (message: string) => {
       const data = JSON.parse(message) as CallistoPluginMessage;
-      console.log(data);
       
       if (data.type === 'input') {
         const { interactionId, args } = data;

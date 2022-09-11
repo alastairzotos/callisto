@@ -14,7 +14,7 @@
     "typescript": "^4.8.2"
   },
   "dependencies": {
-    "@bitmetro/callisto-plugins": "^1.0.4",
+    "@bitmetro/callisto-plugins": "*",
     "node-fetch": "^2.6.7"
   }
 }

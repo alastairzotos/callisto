@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@bitmetro/callisto-plugins@^1.0.4":
+"@bitmetro/callisto-plugins@*":
   "integrity" "sha512-OsNZvyozrxYpQAFA78uLEJo7wAdzqhm3cCjOceO8r/GHNch4+rMNE6mfHN5dJh+tDBlKWLlA/4ZZjhuhDYA04g=="
   "resolved" "https://registry.npmjs.org/@bitmetro/callisto-plugins/-/callisto-plugins-1.0.4.tgz"
   "version" "1.0.4"

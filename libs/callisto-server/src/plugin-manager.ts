@@ -193,7 +193,9 @@ export class PluginManager {
       ctx.addPrompts(prompts || []);
       ctx.addInteraction(pluginId, inputs, async params => {
         try {
+          console.log(params);
           const result = await sendCommand(process, id, params);
+          console.log(result);
 
           if (result.type === 'question') {
             return ask(ctx, result.response, async answer => {

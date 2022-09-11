@@ -39,7 +39,7 @@ export interface CallistoPluginResponse {
 }
 
 export interface CallistoPluginMessage {
-  type: 'cmd' | 'answer';
+  type: 'input' | 'answer';
   interactionId?: string;
   args?: (string | undefined)[];
   answer?: string;

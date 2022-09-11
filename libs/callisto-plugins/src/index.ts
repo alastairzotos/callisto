@@ -1,4 +1,4 @@
-import { CallistoPluginMessage, CallistoPluginResponse } from '@bitmetro/callisto';
+import { CallistoPluginMessage, CallistoPluginResponse } from '@bitmetro/callisto-core';
 
 let answerCallback: ((answer: string) => void | undefined);
 

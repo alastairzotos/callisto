@@ -1,4 +1,4 @@
-import { Callisto } from '@bitmetro/callisto';
+import { Callisto } from '@bitmetro/callisto-core';
 import * as ws from 'ws';
 import * as express from 'express';
 import * as cors from 'cors';

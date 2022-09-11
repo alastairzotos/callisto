@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@bitmetro/callisto": "*",
+    "@bitmetro/callisto-core": "*",
     "@bitmetro/callisto-plugins": "*",
     "chalk": "4",
     "cors": "^2.8.5",

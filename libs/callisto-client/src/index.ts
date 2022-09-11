@@ -1,4 +1,4 @@
-import { CallistoResponse, CEventEmitter } from '@bitmetro/callisto';
+import { CallistoResponse, CEventEmitter } from '@bitmetro/callisto-core';
 import { client as WebSocketClient, connection } from 'websocket';
 
 interface ICallistoClient {

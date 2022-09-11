@@ -1,4 +1,4 @@
-import { CallistoResponse } from '@bitmetro/callisto';
+import { CallistoResponse } from '@bitmetro/callisto-core';
 import * as ws from 'ws';
 import * as chalk from 'chalk';
 

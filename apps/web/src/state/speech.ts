@@ -1,4 +1,4 @@
-import { SpeechInputAdapter, SpeechOutputAdapter, SpeechResult } from '@bitmetro/callisto';
+import { SpeechInputAdapter, SpeechOutputAdapter, SpeechResult } from '@bitmetro/callisto-core';
 import create from 'zustand';
 import { useCallisto } from './callisto';
 

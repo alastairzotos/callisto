@@ -1,4 +1,4 @@
-import { ask, CallistoContext } from '@bitmetro/callisto';
+import { ask, CallistoContext } from '@bitmetro/callisto-core';
 import * as path from 'path';
 import * as fsp from 'fs/promises';
 import * as fs from 'fs';

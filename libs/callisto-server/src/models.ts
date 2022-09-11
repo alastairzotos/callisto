@@ -1,4 +1,4 @@
-import { Callisto } from '@bitmetro/callisto';
+import { Callisto } from '@bitmetro/callisto-core';
 import { ChildProcess } from 'child_process';
 import { WebSocketHandler } from './ws-handler';
 

@@ -2,21 +2,21 @@
 # yarn lockfile v1
 
 
-"@bitmetro/callisto-plugins@*":
-  "integrity" "sha512-OsNZvyozrxYpQAFA78uLEJo7wAdzqhm3cCjOceO8r/GHNch4+rMNE6mfHN5dJh+tDBlKWLlA/4ZZjhuhDYA04g=="
-  "resolved" "https://registry.npmjs.org/@bitmetro/callisto-plugins/-/callisto-plugins-1.0.4.tgz"
-  "version" "1.0.4"
-  dependencies:
-    "@bitmetro/callisto" "1.0.5"
-    "typescript" "^4.8.2"
-
-"@bitmetro/callisto@1.0.5":
-  "integrity" "sha512-gEQeyBDne0xLbz6wJwN3efDDRN5oy0oLQERfl90wZ3sQR77O3Vbd1T5XvYgyQpfjlnTXHIcN3PBL9NxOG+AoGg=="
-  "resolved" "https://registry.npmjs.org/@bitmetro/callisto/-/callisto-1.0.5.tgz"
-  "version" "1.0.5"
+"@bitmetro/callisto-core@1.0.6":
+  "integrity" "sha512-ervDhk4EVxYruLVyuhFAdIVVnIS7jEeZPMXBrbXhY4OJv2H3LjuximKeq9Lanh0Y00yuNwI/YHGoUnSfEc2/vw=="
+  "resolved" "https://registry.npmjs.org/@bitmetro/callisto-core/-/callisto-core-1.0.6.tgz"
+  "version" "1.0.6"
   dependencies:
     "typescript" "^4.8.2"
     "ws" "^8.8.1"
+
+"@bitmetro/callisto-plugins@^1.0.6":
+  "integrity" "sha512-rrR739mAv9EsKq/Fl6tdXQ3/7U+Bt9SF6vf/mK+HXYBursv2fOpk90lFugF7noP70aIJZPzfW+nSwUSCU9I7lg=="
+  "resolved" "https://registry.npmjs.org/@bitmetro/callisto-plugins/-/callisto-plugins-1.0.7.tgz"
+  "version" "1.0.7"
+  dependencies:
+    "@bitmetro/callisto-core" "1.0.6"
+    "typescript" "^4.8.2"
 
 "@types/node@^18.7.14":
   "integrity" "sha512-XnjpaI8Bgc3eBag2Aw4t2Uj/49lLBSStHWfqKvIuXD7FIrZyMLWp8KuAFHAqxMZYTF9l08N1ctUn9YNybZJVmQ=="

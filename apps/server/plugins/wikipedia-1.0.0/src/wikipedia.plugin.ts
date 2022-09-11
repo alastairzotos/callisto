@@ -5,9 +5,9 @@ let topic = '';
 let sentences: string[] = [];
 let sentenceIndex = 0;
 
-onInteraction('query', async (args) => {
+onInteraction('query', async (query) => {
   sentenceIndex = 0;
-  topic = args[0]!;
+  topic = query!;
   sentences = await getSummary(topic);
 
   return sentences[0];

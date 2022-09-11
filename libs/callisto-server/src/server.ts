@@ -59,8 +59,8 @@ export class CallistoServer {
 
     app.get('/health', (_, res) => res.send('healthy'));
 
-    app.get('/plugins', (_, res) => {
-      res.json(this.manifestManager.readManifest());
+    app.get('/plugins', async (_, res) => {
+      res.json(await this.manifestManager.readManifest());
     });
 
     app.get('/prune', async (_, res) => {

@@ -1,5 +1,6 @@
-import { ask, Callisto, CallistoContext } from '@bitmetro/callisto';
+import { ask, CallistoContext } from '@bitmetro/callisto';
 import * as path from 'path';
+import * as fsp from 'fs/promises';
 import * as fs from 'fs';
 import { parse as parseYaml } from 'yaml';
 import { fork, ChildProcess } from 'child_process';
@@ -31,7 +32,7 @@ export class PluginManager {
 
   async importPlugins() {
     await Promise.all(
-      this.manifestManager.getInstalledPlugins()
+      (await this.manifestManager.getInstalledPlugins())
         .map(({ pluginFile }) => this.importPlugin(path.resolve(this.pluginsDir, pluginFile)))
     )
 
@@ -68,15 +69,15 @@ export class PluginManager {
   async prunePlugins() {
     this.logger.log('Pruning stale plugins...');
 
-    const pluginFoldersInManifest = this.manifestManager.getInstalledPlugins().map(({ name, version }) => `${name}-${version}`);
+    const pluginFoldersInManifest = (await this.manifestManager.getInstalledPlugins()).map(({ name, version }) => `${name}-${version}`);
 
-    const pluginFolders = fs.readdirSync(this.pluginsDir);
+    const pluginFolders = await fsp.readdir(this.pluginsDir);
 
     const excessPlugins = pluginFolders
       .filter(file => file !== 'manifest.json')
       .filter(folder => !pluginFoldersInManifest.find(m => m === folder));
 
-    this.logger.log(`Removing ${pluginFolders.map(folder => chalk.gray(folder)).join(', ')}`)
+    this.logger.log(`Removing ${excessPlugins.map(folder => chalk.gray(folder)).join(', ')}`)
 
     excessPlugins.forEach(pluginFolder => rimraf.sync(path.resolve(this.pluginsDir, pluginFolder)))
 
@@ -91,7 +92,7 @@ export class PluginManager {
 
   async uninstallPlugin(name: string) {
     this.logger.log(`Uninstalling plugin ${name}...`)
-    const manifest = this.manifestManager.readManifest();
+    const manifest = await this.manifestManager.readManifest();
 
     const manifestPlugin = manifest[name];
 
@@ -99,7 +100,7 @@ export class PluginManager {
       throw 'no-plugin' as UninstallRejectionReason;
     }
 
-    this.manifestManager.removeFromManifest(name);
+    await this.manifestManager.removeFromManifest(name);
     await this.prunePlugins();
   }
 
@@ -107,7 +108,7 @@ export class PluginManager {
     const { name, version, pluginFile, source } = await this.downloader.downloadPlugin(url as string, this.pluginsDir);
     const plugin = await this.importPlugin(pluginFile);
 
-    this.manifestManager.updateManifest({
+    await this.manifestManager.updateManifest({
       [name]: { name, version, pluginFile: path.relative(this.pluginsDir, pluginFile), source }
     })
 
@@ -131,7 +132,7 @@ export class PluginManager {
 
   private async importPlugin(pluginFile: string) {
     const pluginPath = path.dirname(pluginFile);
-    const pluginFileContent = fs.readFileSync(pluginFile).toString();
+    const pluginFileContent = await fsp.readFile(pluginFile, 'utf-8');
     const fullName = path.basename(pluginPath);
     const format = pluginFile.endsWith('.yaml') || pluginFile.endsWith('.yml') ? 'yaml' : 'json';
 
@@ -148,9 +149,10 @@ export class PluginManager {
       this.logger.log('Installing dependencies', fullName);
       await execAsync('npm i', pluginPath);
 
-      if (fs.existsSync(path.resolve(pluginPath, config.resolve))) {
+      try {
+        await fsp.access(path.resolve(pluginPath, config.resolve), fs.constants.F_OK);
         this.logger.log('Already built. Skipping...', fullName)
-      } else {
+      } catch {
         this.logger.log('Building', fullName);
         await execAsync('npm run build', pluginPath);
       }

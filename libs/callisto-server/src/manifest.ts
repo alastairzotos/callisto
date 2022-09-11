@@ -1,3 +1,4 @@
+import * as fsp from 'fs/promises';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -14,29 +15,31 @@ export class ManifestManager {
     this.manifestFile = path.resolve(this.pluginsDir, 'manifest.json');
   }
 
-  readManifest(): Manifest {
-    if (!fs.existsSync(this.manifestFile)) {
-      fs.writeFileSync(this.manifestFile, '{}');
+  async readManifest(): Promise<Manifest> {
+    try {
+      await fsp.access(this.manifestFile, fs.constants.F_OK)
+    } catch {
+      await fsp.writeFile(this.manifestFile, '{}', 'utf-8')
     }
 
-    const content = fs.readFileSync(this.manifestFile, 'utf-8');
+    const content = await fsp.readFile(this.manifestFile, 'utf-8');
     return JSON.parse(content);
   }
 
-  getInstalledPlugins(): ManifestItem[] {
-    return Object.values(this.readManifest())
+  async getInstalledPlugins(): Promise<ManifestItem[]> {
+    return Object.values(await this.readManifest())
   }
 
-  updateManifest(update: Manifest) {
-    const current = this.readManifest();
+  async updateManifest(update: Manifest) {
+    const current = await this.readManifest();
 
     const newManifestData = { ...current, ...update };
-    fs.writeFileSync(this.manifestFile, JSON.stringify(newManifestData, null, 2));
+    await fsp.writeFile(this.manifestFile, JSON.stringify(newManifestData, null, 2), 'utf-8');
   }
 
-  removeFromManifest(key: string) {
-    const manifest = this.readManifest();
+  async removeFromManifest(key: string) {
+    const manifest = await this.readManifest();
     delete manifest[key];
-    fs.writeFileSync(this.manifestFile, JSON.stringify(manifest, null, 2));
+    await fsp.writeFile(this.manifestFile, JSON.stringify(manifest, null, 2), 'utf-8');
   }
 }

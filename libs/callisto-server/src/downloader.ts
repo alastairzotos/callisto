@@ -1,8 +1,11 @@
 import * as http from 'http';
 import * as https from 'https';
 import * as fs from 'fs';
+import * as fsp from 'fs/promises';
+import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as extract from 'extract-zip';
+import { uuid as uuidv4 } from 'uuidv4';
 
 import { Logger } from './logger';
 import { ManifestItem, DownloadRejectionReason } from './models';
@@ -17,96 +20,61 @@ interface NameValidation {
 export class Downloader {
   private logger = Container.resolve(Logger);
 
-  async downloadPlugin(url: string, destDir: string) {
-    return new Promise<ManifestItem>((resolve, reject) => {
-      try {
-        const name = this.getNameFromUrl(url)
+  async downloadPlugin(url: string, destDir: string): Promise<ManifestItem> {
+    this.logger.log(`Downloading plugin`);
+    const { uuid, zipFilePath } = await this.downloadPluginFile(url, destDir);
 
-        const nameValidation = this.validateFileName(name, path.extname(url));
-        if (!nameValidation) {
-          return reject('bad-format' as DownloadRejectionReason)
+    this.logger.log('Download completed. Extracting...', uuid);
+
+    const pluginDir = path.resolve(destDir, uuid!);
+
+    await extract(zipFilePath, { dir: pluginDir });
+    await fsp.rm(zipFilePath);
+
+    this.logger.log('Extracting completed', uuid);
+
+    const packageJson = JSON.parse(await fsp.readFile(path.resolve(pluginDir, 'package.json'), 'utf-8'));
+    const name = packageJson.name as string;
+    const version = packageJson.version as string;
+
+    const newPluginDir = path.resolve(destDir, `${name}-${version}`);
+    await fse.copy(pluginDir, newPluginDir);
+    await fse.rm(pluginDir, { recursive: true, force: true });
+
+    return {
+      name,
+      version,
+      pluginFile: path.resolve(newPluginDir, 'plugin.yaml'),
+      source: url
+    }
+  }
+
+  private async downloadPluginFile(url: string, destDir: string) {
+    return new Promise<{ uuid: string, zipFilePath: string }>((resolve, reject) => {
+      const uuid = uuidv4();
+
+      this.logger.log(`Downloading plugin with temp ID ${uuid}`, uuid);
+
+      const zipFilePath = path.resolve(destDir, `${uuid}.zip`);
+      const get = url.startsWith('http://') ? http.get : https.get;
+
+      get(url, response => {
+        if (response.statusCode === 404) {
+          this.logger.log(`Cannot find plugin ${url}`, uuid);
+          return reject('not-found' as DownloadRejectionReason);
+        } else {
+          const file = fs.createWriteStream(zipFilePath);
+
+          file.on('finish', async () => {
+            file.close();
+            resolve({ uuid, zipFilePath });
+          });
+
+          file.on('error', reject);
+
+          response.pipe(file);
         }
-
-        this.logger.log(`Downloading plugin`, name);
-
-        const zipFilePath = path.resolve(destDir, `${name}.zip`);
-        const get = url.startsWith('http://') ? http.get : https.get;
-
-        get(url, response => {
-          if (response.statusCode === 404) {
-            this.logger.log(`Cannot find plugin ${url}`, name);
-            return reject('not-found' as DownloadRejectionReason);
-          } else {
-            const file = fs.createWriteStream(zipFilePath);
-            response.pipe(file);
-
-            file.on('finish', async () => {
-              file.close();
-              this.logger.log('Download completed. Extracting...', name);
-
-              const pluginDir = path.resolve(destDir, name!);
-              await extract(zipFilePath, { dir: pluginDir });
-              fs.rmSync(zipFilePath);
-
-              this.logger.log('Extracting completed', name);
-
-              resolve({
-                name: (nameValidation as NameValidation).name,
-                pluginFile: path.resolve(pluginDir, 'plugin.yaml'),
-                source: url,
-                version: (nameValidation as NameValidation).version
-              })
-            });
-          }
-        });
-      } catch {
-        reject('other' as DownloadRejectionReason);
-      }
-    })
-  }
-
-  private validateFileName(file?: string, ext?: string): NameValidation | boolean {
-    if (!file) {
-      return false;
-    }
-
-    if (ext !== '.zip') {
-      return false;
-    }
-    
-    const parts = file.split('-')
-    if (parts.length < 1) {
-      return false;
-    }
-    
-    const version = parts.pop()!;
-    
-    if (!this.validateVersion(version!)) {
-      return false;
-    }
-    
-    const name = parts.join('-');
-    return { name, ext, version };
-  }
-
-  private validateVersion(version: string): [number, number, number] | false {
-    const [major, minor, patch] = version.split('.');
-
-    if (!major || !minor || !patch) {
-      return false;
-    }
-
-    try {
-      return [parseInt(major, 10), parseInt(minor, 10), parseInt(patch, 10)];
-    } catch {
-      return false;
-    }
-  }
-
-  private getNameFromUrl(url: string) {
-    const filename = path.basename(url);
-    const parts = filename.split('.');
-    parts.pop();
-    return parts.join('.');
+      });
+    });
   }
 }

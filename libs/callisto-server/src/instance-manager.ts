@@ -1,7 +1,6 @@
 import { Callisto } from "@bitmetro/callisto-core";
 import { ChildProcess } from 'child_process';
 
-import { Container } from "./container";
 import { Instance } from "./models";
 import { createRandomNumber } from "./utils";
 import { WebSocketHandler } from "./ws-handler";

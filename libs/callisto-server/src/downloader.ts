@@ -11,12 +11,6 @@ import { Logger } from './logger';
 import { ManifestItem, DownloadRejectionReason } from './models';
 import { Container } from './container';
 
-interface NameValidation {
-  name: string;
-  ext: string;
-  version: string;
-}
-
 export class Downloader {
   private logger = Container.resolve(Logger);
 

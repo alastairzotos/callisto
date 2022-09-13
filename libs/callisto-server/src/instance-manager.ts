@@ -72,7 +72,7 @@ export class InstanceManager {
   }
 
   restart(plugin: string) {
-    this.forEach((handle, instance) => {
+    this.forEach((handle) => {
       this.killProcess(handle, plugin);
 
     })

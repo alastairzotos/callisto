@@ -2,14 +2,11 @@ import { Callisto } from "@bitmetro/callisto-core";
 import { ChildProcess } from 'child_process';
 
 import { Container } from "./container";
-import { Logger } from "./logger";
 import { Instance } from "./models";
 import { createRandomNumber } from "./utils";
 import { WebSocketHandler } from "./ws-handler";
 
 export class InstanceManager {
-  private logger = Container.resolve(Logger);
-
   private instances: { [key: string]: Instance } = {};
 
   get(handle: string) {

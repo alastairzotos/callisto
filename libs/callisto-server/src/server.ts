@@ -104,8 +104,11 @@ export class CallistoServer {
     });
 
     app.post('/plugin/env/:plugin', async (req, res) => {
-      await this.envManager.modify(req.params.plugin, req.query as Environment);
-      res.sendStatus(200);
+      res.json(await this.envManager.modify(req.params.plugin, req.query as Environment));
+    })
+
+    app.get('/plugin/env/:plugin', async (req, res) => {
+      res.json(await this.envManager.read(req.params.plugin));
     })
 
     return app;

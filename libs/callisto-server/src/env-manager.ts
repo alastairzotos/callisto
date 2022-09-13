@@ -20,7 +20,6 @@ export class EnvManager {
     const env = await this.read(pluginName);
 
     const newEnv: Environment = { ...env, ...vars };
-    this.pluginManager.applyEnvToPlugin(pluginName, newEnv);
     
     const pluginDir = await this.getPluginDir(pluginName);
     if (pluginDir) {
@@ -30,7 +29,10 @@ export class EnvManager {
         .join('\n');
 
       await fsp.writeFile(envFileDir, envContent, 'utf-8');
+      this.pluginManager.applyEnvToPlugin(pluginName, newEnv);
     }
+
+    return newEnv;
   }
 
   async read(pluginName: string): Promise<Environment> {

@@ -11,6 +11,7 @@ import { Container } from './container';
 import { WebSocketHandler } from './ws-handler';
 import { ManifestManager } from './manifest';
 import { DownloadRejectionReason, UninstallRejectionReason } from './models';
+import { Environment, EnvManager } from './env-manager';
 
 interface ServerOptions {
   pluginsRoot: string;
@@ -23,10 +24,12 @@ export class CallistoServer {
   private pluginManager = Container.resolve(PluginManager);
   private instanceManager = Container.resolve(InstanceManager);
   private manifestManager = Container.resolve(ManifestManager);
+  private envManager = Container.resolve(EnvManager);
 
   constructor(options: ServerOptions) {
     this.pluginManager.setPluginsDir(options.pluginsRoot);
     this.manifestManager.setPluginsDir(options.pluginsRoot);
+    this.envManager.setPluginsDir(options.pluginsRoot);
   }
 
   start(port = 8080) {
@@ -34,7 +37,7 @@ export class CallistoServer {
 
     this.wss = new ws.WebSocketServer({ server: this.createExpressServer().listen(port) });
 
-    this.wss.on('connection', ws => {
+    this.wss.on('connection', async ws => {
       const callisto = new Callisto();
       const wsHandler = new WebSocketHandler(ws);
 
@@ -42,7 +45,7 @@ export class CallistoServer {
 
       this.logger.log(`Received connection. Setting handle to ${chalk.yellow(handle)}`, handle);
 
-      this.pluginManager.applyAllPluginsToInstance(handle);
+      await this.pluginManager.applyAllPluginsToInstance(handle);
 
       wsHandler.setupListeners(handle);
 
@@ -99,6 +102,11 @@ export class CallistoServer {
         }
       }
     });
+
+    app.post('/plugin/env/:plugin', async (req, res) => {
+      await this.envManager.modify(req.params.plugin, req.query as Environment);
+      res.sendStatus(200);
+    })
 
     return app;
   }

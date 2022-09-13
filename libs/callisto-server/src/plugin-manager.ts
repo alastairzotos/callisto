@@ -16,15 +16,17 @@ import { execAsync, extractName } from './utils';
 import { Container } from './container';
 import { InstanceManager } from './instance-manager';
 import { PluginImportSchema } from './schemas';
+import { Environment, EnvManager } from './env-manager';
 
 export class PluginManager {
   private pluginsDir: string = __dirname;
-  private plugins: PluginRef[] = [];
+  private plugins: { [key: string]: PluginRef } = {};
 
   private logger = Container.resolve(Logger);
   private downloader = Container.resolve(Downloader);
   private instanceManager = Container.resolve(InstanceManager);
   private manifestManager = Container.resolve(ManifestManager);
+  private envManager = () => Container.resolve(EnvManager); // Avoid circular ref
 
   setPluginsDir(pluginsDir: string) {
     this.pluginsDir = pluginsDir;
@@ -48,7 +50,7 @@ export class PluginManager {
     instance.ws.sendPrompts(instance.callisto.getContextChain().map(ctx => ctx.getPrompts()).flat());
   }
 
-  applyAllPluginsToInstance(handle: string) {
+  async applyAllPluginsToInstance(handle: string) {
     const instance = this.instanceManager.get(handle);
     if (!instance) {
       return;
@@ -56,9 +58,11 @@ export class PluginManager {
 
     const processes: ChildProcess[] = [];
 
-    for (let plugin of this.plugins) {
+    for (let plugin of Object.values(this.plugins)) {
       if (!instance.processes[plugin.name]) {
-        const process = this.applyPluginToInstance(instance, plugin);
+        const env = await this.envManager().read(plugin.name);
+
+        const process = this.applyPluginToInstance(instance, plugin, env);
         processes.push(process!);
       }
     }
@@ -157,8 +161,10 @@ export class PluginManager {
         await execAsync('npm run build', pluginPath);
       }
 
-      const newPlugin: PluginRef = { name: extractName(fullName), fullName, resolve, pluginPath, interactions };
-      this.plugins.push(newPlugin);
+      const name = extractName(fullName);
+
+      const newPlugin: PluginRef = { name, fullName, resolve, pluginPath, interactions };
+      this.plugins[name] = newPlugin;
 
       this.logger.log('Installation complete', fullName);
 
@@ -168,17 +174,28 @@ export class PluginManager {
     }
   }
 
-  private applyPluginToInstance(instance: Instance, plugin?: PluginRef) {
+  applyEnvToPlugin(pluginName: string, env: Environment) {
+    this.instanceManager.forEach((handle, instance) => {
+      const pluginRef = this.plugins[pluginName];
+
+      if (pluginRef) {
+        this.instanceManager.killProcess(handle, pluginName);
+        this.applyPluginToInstance(instance, pluginRef, env);
+      }
+    })
+  }
+
+  private applyPluginToInstance(instance: Instance, plugin?: PluginRef, env?: Environment) {
     if (plugin) {
       const { name, resolve, pluginPath, interactions } = plugin;
-      const process = fork(resolve, { cwd: pluginPath });
-      instance.processes[plugin.name] = process;
+      const proc = fork(resolve, [], { cwd: pluginPath, env: { ...process.env, ...env } });
+      instance.processes[plugin.name] = proc;
 
       instance.callisto.getRootContext().removeInteractions(name);
 
-      this.addPluginInteractions(name, process!, instance.callisto.getRootContext(), interactions, pluginPath);
+      this.addPluginInteractions(name, proc!, instance.callisto.getRootContext(), interactions, pluginPath);
 
-      return process;
+      return proc;
     }
   }
 

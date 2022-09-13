@@ -75,6 +75,13 @@ export class InstanceManager {
     return killedProcessIds;
   }
 
+  restart(plugin: string) {
+    this.forEach((handle, instance) => {
+      this.killProcess(handle, plugin);
+
+    })
+  }
+
   private createHandle() {
     let handle = createRandomNumber(1, 100000);
     while (!!this.instances[handle]) {

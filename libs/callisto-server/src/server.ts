@@ -55,7 +55,7 @@ export class CallistoServer {
     this.logger.log(`Callisto server running on ${chalk.gray(`ws://localhost:${port}`)}`);
   }
 
-  createExpressServer() {
+  createExpressServer(): express.Express {
     const app = express();
 
     app.use(cors());

@@ -6,7 +6,7 @@ on:
       - "*"
 
 jobs:
-  push:
+  server:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,12 +16,32 @@ jobs:
         run: docker login -u bitmetro -p ${{ secrets.DOCKER_PASSWORD }} docker.io
 
       - name: Build and push server
-        run: |
-          docker build -t bitmetro/callisto-server:${{ github.ref_name }} -f apps/server/Dockerfile .
-          docker push bitmetro/callisto-server:${{ github.ref_name }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          tags: bitmetro/callisto-server:${{ github.ref_name }}
+          push: true
+          build-args: |
+            SCOPE=server
+            PORT=8080
+
+  client:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Docker login
+        run: docker login -u bitmetro -p ${{ secrets.DOCKER_PASSWORD }} docker.io
 
       - name: Build and push client
-        run: |
-          docker build -t bitmetro/callisto-client:${{ github.ref_name }} -f apps/web/Dockerfile . --build-arg NEXT_PUBLIC_CALLISTO_HOST=wss://callisto-server.bitmetro.io
-          docker push bitmetro/callisto-client:${{ github.ref_name }}
-
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          tags: bitmetro/callisto-server:${{ github.ref_name }}
+          push: true
+          build-args: |
+            SCOPE=server
+            PORT=3000

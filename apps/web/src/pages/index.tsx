@@ -3,13 +3,13 @@ import React, { useEffect } from 'react';
 import { Container, CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
-import { ListenButton } from '../src/components/listen-button';
-import { Results } from '../src/components/results';
-import { Logo } from '../src/components/logo';
-import { Settings } from '../src/components/settings';
+import { ListenButton } from '../components/listen-button';
+import { Results } from '../components/results';
+import { Logo } from '../components/logo';
+import { Settings } from '../components/settings';
 
-import { ConnectionStatusDisplay } from '../src/components/connection-status';
-import { useCallisto, useSpeech } from '../src/state';
+import { ConnectionStatusDisplay } from '../components/connection-status';
+import { useCallisto, useSpeech } from '../state';
 
 const darkTheme = createTheme({
   palette: {

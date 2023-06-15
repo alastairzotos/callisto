@@ -1,51 +1,29 @@
-# FROM node:14-slim
+FROM node:16-alpine as builder
 
-# WORKDIR /usr/src/app
-
-# ARG REACT_APP_PROD
-# ENV REACT_APP_PROD $REACT_APP_PROD
-
-# ARG REACT_APP_WEATHER_API_KEY
-# ENV REACT_APP_WEATHER_API_KEY $REACT_APP_WEATHER_API_KEY
-
-# RUN cd apps/callisto
-
-# COPY apps/callisto/package*.json ./
-
-# RUN npm ci
-
-# COPY apps/callisto .
-
-# RUN npm run build
-
-# RUN npm i -g serve
-
-# CMD ["serve", "-s", "./build"]
-
-FROM node:14-slim
 WORKDIR /app
 
-ARG NEXT_PUBLIC_PRODUCTION
-ENV NEXT_PUBLIC_PRODUCTION $NEXT_PUBLIC_PRODUCTION
+ARG SCOPE
+ARG PORT
 
-ARG NEXT_PUBLIC_WEATHER_API_KEY
-ENV NEXT_PUBLIC_WEATHER_API_KEY $NEXT_PUBLIC_WEATHER_API_KEY
+COPY . .
+RUN yarn global add turbo@1.5.5 && \
+    turbo prune --scope=${SCOPE} && \
+    cd out && \
+    yarn install && \
+    turbo run build --scope=${SCOPE} --include-dependencies && \
+    rm -rf node_modules/.cache .yarn/cache
 
-# Install dependencies
-COPY package.json yarn.lock ./
-COPY apps/callisto/package.json apps/callisto/package.json
+FROM node:16-alpine as app
 
-# Add libs here
-COPY libs/callisto/package.json libs/callisto/package.json
+ARG SCOPE
+ARG PORT
 
-RUN yarn --frozen-lockfile
+ENV NODE_ENV=production
 
-# Build
-RUN yarn global add turbo
-COPY turbo.json package.json yarn.lock ./
-COPY apps/callisto apps/callisto
-COPY libs libs
-RUN turbo run build --scope=callisto --include-dependencies
+WORKDIR /app
+COPY --chown=node:node --from=builder /app/out .
 
-EXPOSE 3000
-CMD yarn workspace callisto start
+WORKDIR /app/apps/${SCOPE}
+
+EXPOSE ${PORT}
+CMD yarn start

@@ -40,8 +40,8 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          tags: bitmetro/callisto-server:${{ github.ref_name }}
+          tags: bitmetro/callisto-client:${{ github.ref_name }}
           push: true
           build-args: |
-            SCOPE=server
+            SCOPE=web
             PORT=3000

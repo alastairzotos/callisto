@@ -31,3 +31,4 @@ yarn-error.log*
 .turbo
 
 /apps/server/plugins
+!/apps/server/plugins/manifest.json

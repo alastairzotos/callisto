@@ -1,0 +1,22 @@
+{
+  "name": "weather",
+  "version": "1.0.3",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node ./dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^16.11.56",
+    "typescript": "^4.8.2"
+  },
+  "dependencies": {
+    "@bitmetro/callisto-plugins": "^1.0.9",
+    "dotenv": "^16.0.2",
+    "node-fetch": "^2.6.7"
+  }
+}

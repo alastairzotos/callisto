@@ -30,3 +30,5 @@ yarn-error.log*
 # turbo
 .turbo
 
+/callisto-core/apps/server/plugins
+/callisto-core/apps/server/plugins/*

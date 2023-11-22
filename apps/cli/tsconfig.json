@@ -12,6 +12,7 @@
 		"declaration": true,
 		"experimentalDecorators": false,
 		"emitDecoratorMetadata": false,
-		"baseUrl": "."
+		"baseUrl": ".",
+		"skipLibCheck": true
 	}
 }

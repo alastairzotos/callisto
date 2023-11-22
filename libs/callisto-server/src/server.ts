@@ -58,7 +58,7 @@ export class CallistoServer {
   createExpressServer(): express.Express {
     const app = express();
 
-    app.use(cors());
+    app.use(cors() as any); // Weird build error
 
     app.get('/health', (_, res) => res.send('healthy'));
 

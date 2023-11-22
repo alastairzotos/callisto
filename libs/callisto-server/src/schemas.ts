@@ -10,6 +10,5 @@ export const PluginInteractionSchema: z.ZodType<PluginInteraction> = z.lazy(() =
 }))
 
 export const PluginImportSchema: z.ZodType<PluginImport> = z.object({
-  resolve: z.string(),
   interactions: z.array(PluginInteractionSchema)
 })

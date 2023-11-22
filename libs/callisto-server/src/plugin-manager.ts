@@ -110,6 +110,7 @@ export class PluginManager {
 
   async downloadPlugin(url: string) {
     const { name, version, pluginFile, source } = await this.downloader.downloadPlugin(url as string, this.pluginsDir);
+
     const plugin = await this.importPlugin(pluginFile);
 
     await this.manifestManager.updateManifest({
@@ -135,7 +136,7 @@ export class PluginManager {
   }
 
   private async importPlugin(pluginFile: string) {
-    const pluginPath = path.dirname(pluginFile);
+    const pluginPath = path.resolve(path.dirname(pluginFile));
     const pluginFileContent = await fsp.readFile(pluginFile, 'utf-8');
     const fullName = path.basename(pluginPath);
     const format = pluginFile.endsWith('.yaml') || pluginFile.endsWith('.yml') ? 'yaml' : 'json';
@@ -148,27 +149,14 @@ export class PluginManager {
           ? parseYaml(pluginFileContent)
           : JSON.parse(pluginFileContent);
 
-      const { resolve, interactions } = PluginImportSchema.parse(config) as PluginImport;
+      const { interactions } = PluginImportSchema.parse(config) as PluginImport;
 
       this.logger.log('Installing dependencies', fullName);
       await execAsync('npm i', pluginPath);
 
-      try {
-        await fsp.access(path.resolve(pluginPath, config.resolve), fs.constants.F_OK);
-        this.logger.log('Already built. Skipping...', fullName)
-      } catch {
-        try {
-          this.logger.log('Building', fullName);
-          await execAsync('npm run build', pluginPath);
-        } catch (e) {
-          console.error(e);
-          throw e;
-        }
-      }
-
       const name = extractName(fullName);
 
-      const newPlugin: PluginRef = { name, fullName, resolve, pluginPath, interactions };
+      const newPlugin: PluginRef = { name, fullName, pluginPath, interactions };
       this.plugins[name] = newPlugin;
 
       this.logger.log('Installation complete', fullName);
@@ -192,8 +180,21 @@ export class PluginManager {
 
   private applyPluginToInstance(instance: Instance, plugin?: PluginRef, env?: Environment) {
     if (plugin) {
-      const { name, resolve, pluginPath, interactions } = plugin;
-      const proc = fork(resolve, [], { cwd: pluginPath, env: { ...process.env, ...env } });
+      const { name, pluginPath, interactions } = plugin;
+
+      const packageJson = JSON.parse(fs.readFileSync(path.resolve(pluginPath, 'package.json'), 'utf-8'));
+      const main = packageJson.main as string;
+
+      const proc = fork(
+        path.resolve(pluginPath, main),
+        [],
+        {
+          cwd: pluginPath,
+          env: { ...process.env, ...env },
+          stdio: 'pipe'
+        }
+      );
+
       instance.processes[plugin.name] = proc;
 
       instance.callisto.getRootContext().removeInteractions(name);
@@ -236,7 +237,8 @@ export class PluginManager {
             goToParentContextOnceFinished,
             context: subContext
           }
-        } catch {
+        } catch (e) {
+          console.error(e);
           return 'There was an error handling your request'
         }
       })

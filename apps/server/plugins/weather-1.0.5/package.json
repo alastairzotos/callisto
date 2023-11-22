@@ -1,8 +1,8 @@
 {
   "name": "weather",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node ./dist"

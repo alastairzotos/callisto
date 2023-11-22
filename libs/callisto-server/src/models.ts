@@ -3,7 +3,6 @@ import { ChildProcess } from 'child_process';
 import { WebSocketHandler } from './ws-handler';
 
 export interface PluginImport {
-  resolve: string;
   interactions: PluginInteraction[];
 }
 
@@ -37,7 +36,6 @@ export type UninstallRejectionReason = 'no-plugin';
 export interface PluginRef {
   name: string;
   fullName: string;
-  resolve: string;
   pluginPath: string;
   interactions: PluginInteraction[];
 }

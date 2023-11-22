@@ -27,12 +27,12 @@ export class Downloader {
 
     this.logger.log('Extracting completed', uuid);
 
-    const packageJson = JSON.parse(await fsp.readFile(path.resolve(pluginDir, 'package.json'), 'utf-8'));
+    const packageJson = JSON.parse(await fsp.readFile(path.resolve(pluginDir, 'files', 'package.json'), 'utf-8'));
     const name = packageJson.name as string;
     const version = packageJson.version as string;
 
     const newPluginDir = path.resolve(destDir, `${name}-${version}`);
-    await fse.copy(pluginDir, newPluginDir);
+    await fse.copy(path.resolve(pluginDir, 'files'), newPluginDir);
     await fse.rm(pluginDir, { recursive: true, force: true });
 
     return {

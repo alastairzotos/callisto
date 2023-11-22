@@ -157,8 +157,13 @@ export class PluginManager {
         await fsp.access(path.resolve(pluginPath, config.resolve), fs.constants.F_OK);
         this.logger.log('Already built. Skipping...', fullName)
       } catch {
-        this.logger.log('Building', fullName);
-        await execAsync('npm run build', pluginPath);
+        try {
+          this.logger.log('Building', fullName);
+          await execAsync('npm run build', pluginPath);
+        } catch (e) {
+          console.error(e);
+          throw e;
+        }
       }
 
       const name = extractName(fullName);

@@ -37,3 +37,8 @@ export const sendQuestion = (question: string, cb: (answer: string) => void) => 
 export const sendResponse = (response: string) => {
   process.send?.({ type: 'response', response } as CallistoPluginResponse);
 }
+
+export const askQuestion = (question: string) => new Promise<string>((resolve) => {
+  answerCallback = resolve;
+  process.send?.({ type: 'question', response: question } as CallistoPluginResponse);
+})

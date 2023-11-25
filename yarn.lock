@@ -86,7 +86,7 @@
     ws "^8.8.1"
 
 "@bitmetro/callisto-plugins@*", "@bitmetro/callisto-plugins@file:/Users/alastairzotos/Documents/github/projects/apps/callisto/callisto-core/libs/callisto-plugins":
-  version "1.0.12"
+  version "1.0.13"
   resolved "file:libs/callisto-plugins"
   dependencies:
     "@bitmetro/callisto-core" "1.0.6"

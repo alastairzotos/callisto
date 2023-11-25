@@ -30,5 +30,5 @@ yarn-error.log*
 # turbo
 .turbo
 
-apps/server/plugins
-apps/server/plugins/*
+./apps/server/plugins
+./apps/server/plugins/*

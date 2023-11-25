@@ -12,6 +12,7 @@
     "@bitmetro/callisto-core": "1.0.6",
     "typescript": "^4.8.2"
   },
+  "files": ["dist"],
   "keywords": [],
   "author": "",
   "license": "ISC"
